@@ -9,10 +9,14 @@
 - `js/game.js`：繪圖、操作、事件與遊戲邏輯
 - `js/maps/layouts.js`：固定地圖格線與室內版型
 - `js/maps/README.md`：地圖資料格式與新增方式
-- `js/creatures/catalog.js`：怪物、招式與屬性資料目錄
-- `js/creatures/README.md`：新增怪物與招式的資料格式說明
+- `js/creatures/catalog.js`：怪物與生態資料目錄
+- `js/creatures/README.md`：新增怪物的資料格式說明
+- `js/moves/catalog.js`：招式、屬性克制與學習資料
+- `js/moves/README.md`：新增招式與調整學習資料
+- `js/items/catalog.js`：拾取道具、素材、配方與商店資料
+- `js/items/README.md`：新增道具與調整配方／商店
 
-新增或調整怪物／招式時，先編輯 `js/creatures/catalog.js`；新增地圖則編輯 `js/maps/layouts.js`。遊戲執行邏輯留在 `js/game.js`，載入順序集中在 `index.html`。
+新增或調整怪物、招式、道具與地圖，分別編輯 `js/creatures/`、`js/moves/`、`js/items/` 與 `js/maps/` 中的資料目錄；遊戲執行邏輯留在 `js/game.js`，載入順序集中在 `index.html`。
 
 ## 本機遊玩
 

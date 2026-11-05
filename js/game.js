@@ -89,6 +89,7 @@ const legend=(cx,cy)=>{ell(cx,cy+6,22,16,3);ell(cx,cy+6,21,15,2);R(cx-14,cy-24,8
 const bunny=(cx,cy)=>{ell(cx,cy+8,17,13,3);ell(cx,cy+8,16,12,0);ell(cx-9,cy-14,5,14,3);ell(cx-9,cy-14,3,11,1);ell(cx+9,cy-14,5,14,3);ell(cx+9,cy-14,3,11,1);R(cx-7,cy+4,3,3,3);R(cx+4,cy+4,3,3,3);ell(cx,cy+10,4,3,2)};
 const cutePig=(cx,cy)=>{ell(cx,cy+7,19,14,3);ell(cx,cy+7,18,13,0);R(cx-14,cy-12,8,7,3);R(cx+6,cy-12,8,7,3);ell(cx,cy-5,13,10,3);ell(cx,cy-5,12,9,0);ell(cx,cy+1,5,4,2);R(cx-7,cy-7,3,3,3);R(cx+4,cy-7,3,3,3)};
 const CREATURE_DATA=window.PIGMON_CREATURE_DATA;
+const MOVE_DATA=window.PIGMON_MOVE_DATA;
 const CREATURE_SPRITES={wolf,radish,bee,slime,flame,rock,jelly,legend,bunny,cutePig};
 const createEnemy=(record,customSprites={})=>{
  const {sprite,...data}=record;
@@ -103,19 +104,19 @@ const EXTRA_SPRITES=CREATURE_DATA.extraSpecies.spriteKeys.map(k=>CREATURE_SPRITE
 EXTRA_NAMES.forEach((n,i)=>ENEMIES.push({n,t:EXTRA_TYPES[i%EXTRA_TYPES.length],m:4+(i%12),hp:12+(i%7)*2,atk:3+(i%5),d:EXTRA_SPRITES[i%EXTRA_SPRITES.length]}));
 const LEGENDS=CREATURE_DATA.enemies.legends.map(createEnemy);LEGENDS.forEach(x=>ENEMIES.push(x));
 const LEGEND_IDS=CREATURE_DATA.legendIds.slice(),isLegend=s=>LEGEND_IDS.includes(s),legendTarget=()=>LEGEND_IDS.find(i=>!FL['leg'+i])||7,hasLegendLeft=()=>LEGEND_IDS.some(i=>!FL['leg'+i]);
-const MOVES=CREATURE_DATA.moves.base.map(m=>({...m}));
+const MOVES=MOVE_DATA.moves.base.map(m=>({...m}));
 MOVES.forEach(m=>{if(!m.pp)m.pp=m.t==='h'?10:20});
-const PIG_EXCLUSIVE_MOVE=MOVES.push(...CREATURE_DATA.moves.pigExclusive.map(m=>({...m})))-1;
-const PIG_ULTIMATE_MOVE=MOVES.push(...CREATURE_DATA.moves.pigUltimate.map(m=>({...m})))-1;
-const SPECIES_MOVES={...CREATURE_DATA.speciesMoves};
-const TYPE_MOVE=CREATURE_DATA.typeMove;
+const PIG_EXCLUSIVE_MOVE=MOVES.push(...MOVE_DATA.moves.pigExclusive.map(m=>({...m})))-1;
+const PIG_ULTIMATE_MOVE=MOVES.push(...MOVE_DATA.moves.pigUltimate.map(m=>({...m})))-1;
+const SPECIES_MOVES={...MOVE_DATA.speciesMoves};
+const TYPE_MOVE=MOVE_DATA.typeMove;
 const movesFor0=(s,lv)=>{const p=ENEMIES[s],pool=SPECIES_MOVES[s]||[0,TYPE_MOVE[p?.t]||4,5];return [0,...pool.filter(i=>i!==0&&((i===pool[1]&&lv>=3)||(i===pool[2]&&lv>=8)||(i===pool[3]&&lv>=16)))].slice(0,4)};
 const moveLabel=i=>{const m=MOVES[i];return m.p?`${m.n} 威力${m.p}`:`${m.n}（${m.t==='d'?'降攻':m.t==='rainbow'?'血量變1':m.t==='sweet'?'大補血+復活':'回復'}）`};
-const SE=CREATURE_DATA.typeEffectiveness;
+const SE=MOVE_DATA.typeEffectiveness;
 const mult=(a,d)=>SE[a].includes(d)?2:SE[d].includes(a)?.5:1;
 const nb=()=>GYMS.filter((g,i)=>FL['b'+i]).length;
 const mon=(s,lv)=>{const p=ENEMIES[s],h=p.hp+lv*3,m=statInit({s,n:p.n,t:p.t,lv,max:h,hp:h,exp:0,dh:h,mv:movesFor(s,lv),atk:p.atk+lv});m.max+=m.iv.hp||0;m.hp=m.max;m.dh=m.hp;m.shiny=Math.random()<.015;return yuFix(m)};
-const LEARN={3:4,5:5,7:6,9:8,10:PIG_EXCLUSIVE_MOVE,11:9,13:7,15:PIG_ULTIMATE_MOVE};
+const LEARN=Object.fromEntries(Object.entries(MOVE_DATA.learnLevels).map(([lv,m])=>[lv,m==='pigExclusive'?PIG_EXCLUSIVE_MOVE:m==='pigUltimate'?PIG_ULTIMATE_MOVE:m]));
 /* 修正：呼叫端把「任務代號」放在第 11 個參數、「store」放第 12 個，原本參數對不上，導致所有任務 NPC 被當成商店店員而被刪除 */
 const mk=(m,x,y,c,id,d,t,w,a,q,shop,store)=>({m,x,y,c,id,d,t,w,a,q:q||shop||null,shop:store||null});
 const NPCS=[
@@ -147,7 +148,7 @@ const boltP=(cx,cy)=>{cutePig(cx,cy);R(cx+1,cy-24,4,3,2);R(cx-1,cy-21,4,3,2);R(c
 const dream=(cx,cy)=>{ell(cx,cy+8,22,16,3);ell(cx,cy+8,21,15,0);[-11,11].forEach(o=>{ell(cx+o,cy-18,5,16,3);ell(cx+o,cy-18,3,13,1)});ell(cx,cy-3,15,12,3);ell(cx,cy-3,14,11,0);R(cx-8,cy-6,3,4,3);R(cx+5,cy-6,3,4,3);R(cx-12,cy,4,3,2);R(cx+8,cy,4,3,2);ell(cx,cy+2,5,3,2);R(cx-2,cy+2,1,1,3);R(cx+1,cy+2,1,1,3);R(cx-7,cy-15,14,3,2);R(cx-7,cy-19,3,4,2);R(cx-1,cy-21,3,6,2);R(cx+4,cy-19,3,4,2);ell(cx-3,cy+12,3,3,2);ell(cx+3,cy+12,3,3,2);R(cx-5,cy+14,10,3,2);R(cx-28,cy-8,3,3,2);R(cx+25,cy-4,3,3,2);R(cx+22,cy-22,2,2,1);R(cx-26,cy+10,2,2,1)};
 ENEMIES.push(...CREATURE_DATA.enemies.v2Legends.map(e=>createEnemy(e,{moonB:moonB,boltP:boltP})));
 LEGEND_IDS.push(105,106);const ULT=107;ENEMIES.push(...CREATURE_DATA.enemies.dreamLegend.map(e=>createEnemy(e,{dream:dream})));
-MOVES.push(...CREATURE_DATA.moves.v2Legends.map(m=>({...m})));
+MOVES.push(...MOVE_DATA.moves.v2Legends.map(m=>({...m})));
 SPECIES_MOVES[105]=[0,21];SPECIES_MOVES[106]=[0,22];SPECIES_MOVES[107]=[0,23,24,25];
 let PZ=null;
 const pzTog=(g,i)=>{const x=i%3,y=i/3|0;[[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const X=x+a,Y=y+b;if(X>=0&&X<3&&Y>=0&&Y<3)g[Y*3+X]^=1})};
@@ -161,7 +162,8 @@ QUESTS.dream={title:'夢幻謎題',offer:'傳說中的「夢幻兔豬皇」只�
  give:async()=>{await say('把 9 顆星星全部點亮！\n（A 切換周圍　B 重新洗牌）');await puzzle();await say('星星全部亮了！粉紅的夢幻光芒灑落……');const m=mon(ULT,30);if(party.length<6){party.push(m);await say(`${m.n}加入了隊伍！`)}else{pcBox.push(m);await say('隊伍滿了，已傳送到電腦盒子！')}dex.add(m.n);FL['s'+ULT]=1;await say(`${m.n}登錄到圖鑑了！（${dex.size}/${ENEMIES.length}）`)}};
 NPCS.push(mk('town',11,13,3,'qdream',['夢幻研究員：傳說中的兔豬皇，只有解開星夢謎題的人才能見到。'],null,null,null,null,'dream'));
 /* ---- exploration expansion ---- */
-const ITEM_DATA={'route:8:5':{name:'回復藥',give:()=>BAG.heal=(BAG.heal||0)+1},'forest:10:4':{name:'高級飼料',give:()=>BAG.superFeed++},'a2:6:8':{name:'稀有糖果',give:()=>{pig.love=(pig.love||0)+5}}};
+const ITEM_CATALOG=window.PIGMON_ITEM_CATALOG;
+const ITEM_DATA=ITEM_CATALOG.pickups.base;
 const HIDDEN_ROADS={'route:10:4':{name:'風鈴小徑',reveal:()=>{put('route','.',[[11,4],[12,4]]);FL.hiddenRoute=1}}};
 ROUTE[4]=ROUTE[4].slice(0,10)+'q'+ROUTE[4].slice(11);
 /* ---- v3 world ---- */
@@ -179,9 +181,9 @@ const moonWolf=(cx,cy)=>{wolf(cx,cy);ell(cx+14,cy-22,5,5,2);ell(cx+16,cy-23,4,4,
 const wolfD=['拜月狼：嗷嗚——月光下的森林，只有我這一隻！','想通過這裡，先打倒我！'];
 NPCS.push(Object.assign(mk('forest',13,6,3,'wolf',wolfD,{n:'拜月狼',lv:5,b:{n:'拜月狼',hp:28,atk:5,d:moonWolf}},['拜月狼：嗚……月光認可你了。','森林的出口開啟了！'],wolfD[0]),{sp:wolfTile,hide:1}));
 ENEMIES.push(...CREATURE_DATA.enemies.yuTuTu.map(e=>createEnemy(e)));
-MOVES.push(...CREATURE_DATA.moves.yuBase.map(m=>({...m})));SPECIES_MOVES[108]=[0,26,27,28];
+MOVES.push(...MOVE_DATA.moves.yuBase.map(m=>({...m})));SPECIES_MOVES[108]=[0,26,27,28];
 /* ===== 鈺兔兔專屬招式庫（玩家持有時套用）===== */
-const YU_SET=CREATURE_DATA.moves.yuSpecial.map(m=>MOVES.push({...m})-1);
+const YU_SET=MOVE_DATA.moves.yuSpecial.map(m=>MOVES.push({...m})-1);
 function yuFix(m){if(m&&m.s===108){if(!m.mv||m.mv.join()!==YU_SET.join())m.mv=YU_SET.slice();m.maxpp=m.mv.map(()=>99);m.pp=m.mv.map(()=>99)}return m}
 const SQ=[['水系怪物最怕哪個屬性？',['火','電','暗'],1],['兔子的長耳朵有什麼用？',['散熱聽遠處','能飛行','變蘿蔔'],0],['光屬性對誰效果絕佳？',['火','冰','暗'],2]];
 async function teach(){S.mode='event';if(FL.yu){await say('老師：你是班上的第一名！鈺兔兔就拜託你照顧囉。');return}
@@ -216,8 +218,8 @@ for(const m of ['route','school','a2','a3','a4','a5','a6'])NPCS.push(mk(m,m==='r
 /* ---- v5 ---- */
 [['route',9,11,'school',9,0],['a2',15,11,'a3',2,0],['a4',18,0,'a5',2,11]].forEach(([a,xa,ya,b,xb,yb])=>{delete WARP[`${a},19,6`];delete WARP[`${b},0,6`];put(a,'#',[[19,6]]);put(b,'#',[[0,6]]);put(a,'.',[[xa,ya]]);put(b,'.',[[xb,yb]]);WARP[`${a},${xa},${ya}`]=[b,xb,yb?yb-1:1];WARP[`${b},${xb},${yb}`]=[a,xa,ya?ya-1:1]});
 const RARE=CREATURE_DATA.rareIds,TMV={},LEARN2={};
-[...new Set(RARE.map(i=>ENEMIES[i].t))].forEach(t=>{TMV[t]=[['氣彈',13,.95],['波動',18,.9],['風暴',25,.85]].map(([n,p,a])=>MOVES.push({n:t+n,p,a,y:t})-1)});
-RARE.forEach((i,k)=>{const e=ENEMIES[i],big=!(i>=95&&i<=104),o=[0,1,2].map(j=>TMV[e.t][(j+k)%3]),g=MOVES.push({n:e.n.slice(0,2)+['奇蹟','祝福','狂想曲','閃擊','之歌'][k%5],p:big?40+(k%3)*6:22+(k%3)*3,a:.9,y:e.t})-1,b=big?26:0;
+[...new Set(RARE.map(i=>ENEMIES[i].t))].forEach(t=>{TMV[t]=MOVE_DATA.rareTemplates.map(([n,p,a])=>MOVES.push({n:t+n,p,a,y:t})-1)});
+RARE.forEach((i,k)=>{const e=ENEMIES[i],big=!(i>=95&&i<=104),o=[0,1,2].map(j=>TMV[e.t][(j+k)%3]),g=MOVES.push({n:e.n.slice(0,2)+MOVE_DATA.rareNameSuffixes[k%5],p:big?40+(k%3)*6:22+(k%3)*3,a:.9,y:e.t})-1,b=big?26:0;
  LEARN2[i]={[b+6+k%3]:o[0],[b+12+k%3]:o[1],[b+18+k%2]:o[2],[b+24+k%4]:g}});
 const movesFor=(s,lv)=>{const b=movesFor0(s,lv),T=LEARN2[s];if(!T||SPECIES_MOVES[s])return b;const a=[...new Set([...b,...Object.keys(T).filter(l=>+l<=lv).sort((x,y)=>x-y).map(l=>T[l])])];return a.length>4?[a[0],...a.slice(-3)]:a};
 /* ---- mine / volcano interior expansion ---- */
@@ -226,13 +228,13 @@ const mineMap=MAP_LAYOUTS.mine;
 const volcInMap=MAP_LAYOUTS.volcIn;
 MAPS.mine=mineMap;MAPS.volcIn=volcInMap;
 const mineBase=ENEMIES.length;
-const mineMoves=MOVES.push(...CREATURE_DATA.moves.mine.map(m=>({...m})))-4;
+const mineMoves=MOVES.push(...MOVE_DATA.moves.mine.map(m=>({...m})))-4;
 ENEMIES.push(...CREATURE_DATA.enemies.mine.map(e=>createEnemy(e)));
 const MINE_IDS=[mineBase,mineBase+1],VOLCIN_IDS=[mineBase+2,mineBase+3];
 SPECIES_MOVES[mineBase]=[0,mineMoves,6];SPECIES_MOVES[mineBase+1]=[0,mineMoves+1,14];SPECIES_MOVES[mineBase+2]=[0,mineMoves+2,11];SPECIES_MOVES[mineBase+3]=[0,mineMoves+3,12];
 WARP['a5,10,10']=['mine',1,1];WARP['mine,18,11']=['a5',10,11];WARP['volc,10,8']=['volcIn',1,1];WARP['volcIn,1,4']=['volc',10,9];
 put('a5','D',[[10,10]]);put('volc','D',[[10,8]]);put('mine','D',[[18,11]]);put('volcIn','D',[[1,4]]);
-Object.assign(ITEM_DATA,{'mine:5:6':{name:'礦石碎片',give:()=>{BAG.coins+=80}},'volcIn:17:11':{name:'熔火結晶',give:()=>{BAG.coins+=120;party.forEach(m=>m.love=Math.min(100,(m.love||0)+3))}}});
+Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.mineVolcano);
 put('mine','I',[[5,6]]);put('volcIn','I',[[17,11]]);
 SECRETS['secret:mine:8:3']={title:'礦工的古老銘牌',lines:['礦壁上刻著一枚古老銘牌。','銘牌化作力量，隊伍全員最大體力提升 4 點！'],reward:'minehp'};
 SECRETS['secret:volcIn:12:5']={title:'火山心焰',lines:['岩漿深處傳來心跳般的聲音。','小豬取得火山祝福，火屬性招式威力提升！'],reward:'volcbuff'};
@@ -245,13 +247,13 @@ NPCS.push(mk('a5',11,10,2,'qmine',['礦工：地下礦坑的礦脈最近一直�
 PAL.iceCave=['#f3fbff','#b8e9ff','#4389b5','#17324b'];PAL.lab=['#edf1f2','#aab6bd','#4c5b63','#172126'];
 const iceCaveMap=MAP_LAYOUTS.iceCave;const labMap=MAP_LAYOUTS.lab;MAPS.iceCave=iceCaveMap;MAPS.lab=labMap;
 const newBase=ENEMIES.length;
-const newMoves=MOVES.push(...CREATURE_DATA.moves.iceLab.map(m=>({...m})))-4;
+const newMoves=MOVES.push(...MOVE_DATA.moves.iceLab.map(m=>({...m})))-4;
 ENEMIES.push(...CREATURE_DATA.enemies.iceLab.map(e=>createEnemy(e)));
 const ICE_IDS=[newBase,newBase+1],LAB_IDS=[newBase+2,newBase+3];
 SPECIES_MOVES[newBase]=[0,newMoves,14];SPECIES_MOVES[newBase+1]=[0,newMoves+1,14];SPECIES_MOVES[newBase+2]=[0,newMoves+3,13];SPECIES_MOVES[newBase+3]=[0,newMoves+2,10];
 WARP['a6,10,10']=['iceCave',1,1];WARP['iceCave,18,11']=['a6',10,11];WARP['school,10,10']=['lab',1,1];WARP['lab,18,11']=['school',10,11];
 put('a6','D',[[10,10]]);put('iceCave','D',[[18,11]]);put('school','D',[[10,10]]);put('lab','D',[[18,11]]);
-Object.assign(ITEM_DATA,{'mine:15:10':{name:'鐵礦核心',give:()=>{BAG.coins+=140}},'mine:3:10':{name:'礦工頭盔',give:()=>{party.forEach(m=>m.def=(m.def||8)+2)}},'volcIn:3:11':{name:'耐熱果',give:()=>{party.forEach(m=>m.max+=5)}},'volcIn:15:9':{name:'火山硫晶',give:()=>{BAG.coins+=180}},'iceCave:17:11':{name:'冰藍晶石',give:()=>{BAG.coins+=160}},'lab:16:9':{name:'實驗資料晶片',give:()=>{BAG.coins+=200}}});
+Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.labAndMine);
 put('mine','I',[[15,10],[3,10]]);put('volcIn','I',[[3,11],[15,9]]);put('iceCave','I',[[17,11]]);put('lab','I',[[16,9]]);
 const ROCK_PUZZLES={
  'mine:10:8':{title:'礦坑推石機關',stone:[1,2],goal:[3,2],reward:()=>{BAG.coins+=260}},
@@ -273,13 +275,13 @@ NPCS.push(mk('a6',11,10,2,'qice',['守洞人：冰晶洞窟裡的月輪正在發
 PAL.ruins=['#f3ecdc','#d6bd83','#90713f','#3b2a17'];PAL.dreamSpace=['#f4eaff','#c9a5f5','#7650b5','#241344'];
 const ruinsMap=MAP_LAYOUTS.ruins;const dreamSpaceMap=MAP_LAYOUTS.dreamSpace;MAPS.ruins=ruinsMap;MAPS.dreamSpace=dreamSpaceMap;
 const extraBase=ENEMIES.length;
-const extraMoves=MOVES.push(...CREATURE_DATA.moves.ruinsDream.map(m=>({...m})))-4;
+const extraMoves=MOVES.push(...MOVE_DATA.moves.ruinsDream.map(m=>({...m})))-4;
 ENEMIES.push(...CREATURE_DATA.enemies.ruinsDream.map(e=>createEnemy(e)));
 const RUINS_IDS=[extraBase,extraBase+1],DREAM_IDS=[extraBase+2,extraBase+3];
 SPECIES_MOVES[extraBase]=[0,extraMoves,6];SPECIES_MOVES[extraBase+1]=[0,extraMoves+1,15];SPECIES_MOVES[extraBase+2]=[0,extraMoves+2,15];SPECIES_MOVES[extraBase+3]=[0,extraMoves+3,12];
 WARP['a5,8,4']=['ruins',1,1];WARP['ruins,18,11']=['a5',8,5];WARP['town,10,13']=['dreamSpace',1,1];WARP['dreamSpace,18,11']=['town',10,14];
 put('a5','D',[[8,4]]);put('ruins','D',[[18,11]]);put('town','D',[[10,13]]);put('dreamSpace','D',[[18,11]]);
-Object.assign(ITEM_DATA,{'ruins:16:9':{name:'古代符石',give:()=>{BAG.coins+=240}},'ruins:3:11':{name:'遺跡護符',give:()=>{party.forEach(m=>m.spd=(m.spd||8)+2)}},'dreamSpace:16:9':{name:'夢境星屑',give:()=>{party.forEach(m=>m.love=Math.min(100,(m.love||0)+8))}},'dreamSpace:3:11':{name:'幻夢糖果',give:()=>{BAG.superFeed++}}});
+Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.ruinsDream);
 put('ruins','I',[[16,9],[3,11]]);put('dreamSpace','I',[[16,9],[3,11]]);
 Object.assign(ROCK_PUZZLES,{'ruins:15:6':{title:'古代石門推石機關',stone:[1,2],goal:[3,2],reward:()=>{FL.ruinsDoor=1;BAG.coins+=350}},'dreamSpace:8:6':{title:'夢境漂浮石機關',stone:[1,2],goal:[3,2],reward:()=>{FL.dreamDoor=1;BAG.superFeed++}}});
 Object.keys(ROCK_PUZZLES).filter(k=>k.startsWith('ruins:')||k.startsWith('dreamSpace:')).forEach(k=>{const[m,x,y]=k.split(':');put(m,'P',[[+x,+y]])});put('ruins','.',[[10,6]]);
@@ -294,12 +296,12 @@ NPCS.push(mk('a5',9,4,2,'qruins',['遺跡學者：古代遺跡的星盤又開始
 PAL.undersea=['#dffaff','#82dce6','#258caa','#07394a'];
 const underseaMap=MAP_LAYOUTS.undersea;MAPS.undersea=underseaMap;
 const seaBase=ENEMIES.length;
-const seaMoves=MOVES.push(...CREATURE_DATA.moves.undersea.map(m=>({...m})))-4;
+const seaMoves=MOVES.push(...MOVE_DATA.moves.undersea.map(m=>({...m})))-4;
 ENEMIES.push(...CREATURE_DATA.enemies.undersea.map(e=>createEnemy(e)));
 const UNDERSEA_IDS=[seaBase,seaBase+1,seaBase+2,seaBase+3];
 SPECIES_MOVES[seaBase]=[0,seaMoves,8];SPECIES_MOVES[seaBase+1]=[0,seaMoves,14];SPECIES_MOVES[seaBase+2]=[0,seaMoves+2,16];SPECIES_MOVES[seaBase+3]=[0,seaMoves+3,12];
 WARP['sea,12,10']=['undersea',1,1];WARP['undersea,18,11']=['sea',12,11];put('sea','D',[[12,10]]);put('undersea','D',[[18,11]]);
-Object.assign(ITEM_DATA,{'undersea:16:9':{name:'深海珍珠',give:()=>{BAG.coins+=260}},'undersea:3:11':{name:'珊瑚護符',give:()=>{party.forEach(m=>m.spd=(m.spd||8)+3)}}});put('undersea','I',[[16,9],[3,11]]);
+Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.undersea);put('undersea','I',[[16,9],[3,11]]);
 SECRETS['secret:undersea:12:5']={title:'海底古鐘',lines:['海底古鐘敲出悠遠的聲音。','水屬性招式威力提升，隊伍獲得深海祝福！'],reward:'seabuff'};put('undersea','E',[[12,5]]);
 QUESTS.undersea={title:'海底洞窟探勘',offer:'海底古鐘停止了鳴響，請到洞窟深處調查。',progress:()=>`進度：找到海底古鐘（${FL['secret:undersea:12:5']?'已完成':'尚未完成'}）。`,done:()=>!!FL['secret:undersea:12:5'],doneText:'海底古鐘重新響起了！',give:async()=>{BAG.coins+=460;await say('獲得 460 枚金幣！')}};
 NPCS.push(mk('sea',11,10,2,'qundersea',['潛水員：海底洞窟入口附近的潮汐變得很奇怪。'],null,null,null,null,'undersea'));
@@ -312,17 +314,14 @@ const underseaWild=()=>[...UNDERSEA_IDS,...(typeof SEA_RELIC_IDS==='undefined'?[
 	 const moonMoth=(cx,cy)=>{bee(cx,cy);evoPoly([[cx-8,cy-4],[cx-25,cy-18],[cx-19,cy+2]],'#b4d875');evoPoly([[cx+8,cy-4],[cx+25,cy-18],[cx+19,cy+2]],'#b4d875');evoRing(cx,cy-18,5,'#fff0a8',2)};
 	 const groveStag=(cx,cy)=>{wolf(cx,cy);evoPoly([[cx-13,cy-20],[cx-25,cy-31],[cx-20,cy-18],[cx-31,cy-23],[cx-18,cy-12]],'#83bd72');evoPoly([[cx+13,cy-20],[cx+25,cy-31],[cx+20,cy-18],[cx+31,cy-23],[cx+18,cy-12]],'#83bd72');evoPixel(cx-3,cy-2,3,3,'#fff3a8');evoPixel(cx+5,cy-2,3,3,'#fff3a8')};
 	 const biomeBase=ENEMIES.length;
-	 const biomeMoves=MOVES.push(...CREATURE_DATA.moves.biome.map(m=>({...m})))-6;
+	 const biomeMoves=MOVES.push(...MOVE_DATA.moves.biome.map(m=>({...m})))-6;
 	 ENEMIES.push(...CREATURE_DATA.enemies.biome.map(e=>createEnemy(e,{abyssKelp:abyssKelp,coralRay:coralRay,tideBoar:tideBoar,mossWisp:mossWisp,moonMoth:moonMoth,groveStag:groveStag})));
 	 const BIOME_IDS=[biomeBase,biomeBase+1,biomeBase+2,biomeBase+3,biomeBase+4,biomeBase+5],SEA_RELIC_IDS=BIOME_IDS.slice(0,3),FOREST_RELIC_IDS=BIOME_IDS.slice(3);
 	 SPECIES_MOVES[biomeBase]=[0,biomeMoves,8];SPECIES_MOVES[biomeBase+1]=[0,biomeMoves+1,10];SPECIES_MOVES[biomeBase+2]=[0,biomeMoves+2,12];SPECIES_MOVES[biomeBase+3]=[0,biomeMoves+3,8];SPECIES_MOVES[biomeBase+4]=[0,biomeMoves+4,10];SPECIES_MOVES[biomeBase+5]=[0,biomeMoves+5,12];
-	 const RARE_LOOT={
-	  [biomeBase]:['深淵藻核',160],[biomeBase+1]:['星鰩珊瑚',180],[biomeBase+2]:['潮汐獠牙',220],
-	  [biomeBase+3]:['苔光露珠',170],[biomeBase+4]:['月蛾粉晶',210],[biomeBase+5]:['古樹鹿角',260]
-	 };
+	 const RARE_LOOT=Object.fromEntries(Object.entries(ITEM_CATALOG.rareDropsByOffset).map(([i,d])=>[biomeBase+Number(i),d]));
 	 BAG.rareDrops=BAG.rareDrops||{};
 	 function tryRareDrop(E){const drop=RARE_LOOT[E.s];if(!drop||Math.random()>.24)return false;BAG.rareDrops[drop[0]]=(BAG.rareDrops[drop[0]]||0)+1;return drop}
-	 Object.assign(ITEM_DATA,{'rare:深淵藻核':{name:'深淵藻核',give:()=>BAG.coins+=160},'rare:星鰩珊瑚':{name:'星鰩珊瑚',give:()=>BAG.coins+=180},'rare:潮汐獠牙':{name:'潮汐獠牙',give:()=>BAG.coins+=220},'rare:苔光露珠':{name:'苔光露珠',give:()=>BAG.coins+=170},'rare:月蛾粉晶':{name:'月蛾粉晶',give:()=>BAG.coins+=210},'rare:古樹鹿角':{name:'古樹鹿角',give:()=>BAG.coins+=260}});
+	 Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.biomeMaterials);
 	 
 const CARTS={'mine:4:11':[[3,1],[15,10]],'volcIn:9:8':[[2,1],[16,10]]};
 const LIFTS={'mine:10:1':[[10,11]],'mine:10:11':[[10,1]],'volcIn:9:1':[[9,10]],'volcIn:9:10':[[9,1]],'lab:9:1':[[9,10]],'lab:9:10':[[9,1]]};
@@ -338,11 +337,11 @@ WARP['forest,10,1']=['forestDeep',1,1];WARP['forestDeep,18,11']=['forest',10,2];
 WARP['ruins,10,1']=['ruins2',1,1];WARP['ruins2,18,11']=['ruins',10,2];WARP['dreamSpace,10,1']=['dreamBranch',1,1];WARP['dreamBranch,18,11']=['dreamSpace',10,2];WARP['dreamBranch,10,1']=['dreamCore',1,1];WARP['dreamCore,18,11']=['dreamBranch',10,2];
 WARP['lab,10,1']=['labUnderground',1,1];WARP['labUnderground,18,11']=['lab',10,2];
 put('undersea','D',[[10,1]]);put('underseaDeep','D',[[18,11],[10,1]]);put('trench','D',[[18,11]]);put('forest','D',[[10,1]]);put('forestDeep','D',[[18,11],[10,1]]);put('forestGrove','D',[[18,11]]);put('ruins','D',[[10,1]]);put('ruins2','D',[[18,11]]);put('dreamSpace','D',[[10,1]]);put('dreamBranch','D',[[18,11],[10,1]]);put('dreamCore','D',[[18,11]]);put('lab','D',[[10,1]]);put('labUnderground','D',[[18,11]]);
-Object.assign(ITEM_DATA,{'underseaDeep:15:10':{name:'深淵珍珠',give:()=>{BAG.coins+=360}},'trench:3:10':{name:'海溝藍晶',give:()=>{BAG.coins+=420}},'forestDeep:15:10':{name:'古樹果實',give:()=>{party.forEach(m=>m.hp=m.max)}},'forestGrove:3:10':{name:'森林護符',give:()=>{party.forEach(m=>m.love=Math.min(100,(m.love||0)+6))}},'ruins2:15:10':{name:'王室遺物',give:()=>{BAG.coins+=500}},'dreamBranch:3:10':{name:'夢路花瓣',give:()=>{BAG.superFeed++}},'dreamCore:15:10':{name:'夢境晶核',give:()=>{BAG.coins+=520}},'labUnderground:3:10':{name:'地下研究樣本',give:()=>{BAG.coins+=480}}});
+Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.deepRegions);
 put('underseaDeep','I',[[15,10]]);put('trench','I',[[3,10]]);put('forestDeep','I',[[15,10]]);put('forestGrove','I',[[3,10]]);put('ruins2','I',[[15,10]]);put('dreamBranch','I',[[3,10]]);put('dreamCore','I',[[15,10]]);put('labUnderground','I',[[3,10]]);
 /* ---- final systems completion ---- */
 const finalBossBase=ENEMIES.length;
-const bossMoves=MOVES.push(...CREATURE_DATA.moves.finalBosses.map(m=>({...m})))-5;
+const bossMoves=MOVES.push(...MOVE_DATA.moves.finalBosses.map(m=>({...m})))-5;
 ENEMIES.push(...CREATURE_DATA.enemies.finalBosses.map(e=>createEnemy(e)));
 const FINAL_BOSSES={underseaDeep:finalBossBase,forestGrove:finalBossBase+1,ruins2:finalBossBase+2,dreamCore:finalBossBase+3,labUnderground:finalBossBase+4};
 Object.entries(FINAL_BOSSES).forEach(([m,i])=>{SPECIES_MOVES[i]=[0,bossMoves+(i-finalBossBase),1]});
@@ -350,13 +349,7 @@ Object.keys(FINAL_BOSSES).forEach(m=>{const pos={underseaDeep:[15,5],forestGrove
 const BOSS_BALANCE={};
 BOSS_BALANCE[finalBossBase]={hp:108,atk:20,crit:.08};BOSS_BALANCE[finalBossBase+1]={hp:104,atk:19,crit:.07};BOSS_BALANCE[finalBossBase+2]={hp:118,atk:22,crit:.1};BOSS_BALANCE[finalBossBase+3]={hp:122,atk:23,crit:.12};BOSS_BALANCE[finalBossBase+4]={hp:116,atk:21,crit:.09};
 BAG.bossDrops=BAG.bossDrops||{};
-const BOSS_DROPS={
- [finalBossBase]:{name:'深淵海龍',coins:600,items:[['深海龍鱗',1],['深海珍珠',2],['水屬性晶核',1]],effect:()=>{FL.seaBoss=1}},
- [finalBossBase+1]:{name:'森林秘境古王',coins:520,items:[['古王樹果',2],['森林王冠',1],['森林護符',1]],effect:()=>{party.forEach(m=>m.love=Math.min(100,(m.love||0)+10))}},
- [finalBossBase+2]:{name:'遺跡第二層守護神',coins:700,items:[['王室遺物',1],['古代星砂',2],['遺跡護符',1]],effect:()=>{FL.ruinsBoss=1}},
- [finalBossBase+3]:{name:'夢境核心雙生體',coins:800,items:[['夢境晶核',1],['幻夢糖果',2],['雙生夢片',1]],effect:()=>{FL.dreamBoss=1}},
- [finalBossBase+4]:{name:'地下研究所終極體',coins:900,items:[['終極研究樣本',1],['實驗資料晶片',1],['電力核心',1]],effect:()=>{FL.labBoss=1}}
-};
+const BOSS_DROPS=Object.fromEntries(Object.entries(ITEM_CATALOG.bossDropsByOffset).map(([i,d])=>[finalBossBase+Number(i),d]));
 async function giveBossDrops(id){const d=BOSS_DROPS[id];if(!d||FL['drop:'+id])return;FL['drop:'+id]=1;BAG.coins+=d.coins;d.items.forEach(([n,q])=>{BAG.bossDrops[n]=(BAG.bossDrops[n]||0)+q});d.effect&&d.effect();await say(`${d.name}掉落：${d.items.map(x=>x[0]+' ×'+x[1]).join('、')}；金幣 +${d.coins}！`)}
 async function forestAftermath(){
  if(FL.forestAftermath>=4)return;S.mode='event';
@@ -368,7 +361,7 @@ async function forestAftermath(){
 async function mapBoss(){const id=FINAL_BOSSES[cur];if(id===undefined)return;if(FL['boss:'+cur]){S.mode='event';if(await choose(['首領再戰','離開'],1,'right')===0){await say('首領再次展現了幻影！');await battle(0,0,id)}S.mode='map';return}S.mode='event';await say(`${ENEMIES[id].n}守護著這片區域！`);await battle(0,0,id);if(!B||!B.e||B.e.hp>0){S.mode='map';return}FL['boss:'+cur]=1;await giveBossDrops(id);MAP[Pl.y]=MAP[Pl.y].slice(0,Pl.x)+'.'+MAP[Pl.y].slice(Pl.x+1);if(cur==='forestGrove')await forestAftermath();if(cur==='dreamCore'){const ending=await choose(['守護夢境','喚醒現實'],1,'right');if(ending===0){FL.dreamEnding='守護';BAG.superFeed+=2;await say('結局：夢境守護者。夢境與現實和平共存！')}else{FL.dreamEnding='覺醒';BAG.coins+=800;await say('結局：黎明覺醒。小豬帶著夢境寶藏回到現實！')}}await say('區域首領已被擊敗！');S.mode='map'}
 const SWITCHES={'trench:10:6':{title:'海溝水位控制盤',open:[['trench',11,6],['trench',12,6]],msg:'水位下降，海溝通道打開了！'},'volcIn:9:7':{title:'熔岩流向開關',open:[['volcIn',10,6],['volcIn',11,6]],msg:'熔岩改道，火山門降下了！'},'labUnderground:9:8':{title:'地下研究所電力開關',open:[['labUnderground',10,8],['labUnderground',11,8]],msg:'電力恢復，連動門解鎖了！'}};
 async function switchPuzzle(key){const q=SWITCHES[key];if(!q||FL['switch:'+key])return;S.mode='event';const c=await choose(['啟動開關','取消'],1,'right',true);if(c===0){FL['switch:'+key]=1;q.open.forEach(([m,x,y])=>{const a=MAPS[m];a[y]=a[y].slice(0,x)+'.'+a[y].slice(x+1)});await say(`${q.title}啟動！${q.msg}`)}S.mode='map'}
-Object.assign(ITEM_DATA,{'trenchEast:16:9':{name:'東潮羅盤',give:()=>{BAG.coins+=320;FL.eastCompass=1}},'trenchWest:3:10':{name:'沉船航海鐘',give:()=>{BAG.superFeed++;FL.westBell=1}},'forestCanopy:16:9':{name:'樹冠月繭',give:()=>{party.forEach(m=>m.love=Math.min(100,(m.love||0)+7));FL.canopyCocoon=1}},'forestMoss:3:10':{name:'苔影種莢',give:()=>{party.forEach(m=>m.hp=m.max);FL.mossPod=1}},'forestGrove:16:9':{name:'古王根晶',give:()=>{BAG.coins+=420;FL.groveRoot=1}}});
+Object.assign(ITEM_DATA,ITEM_CATALOG.pickups.lateRegions);
 function installBiomeLandmarks(){[['trenchEast',16,9],['trenchWest',3,10],['forestCanopy',16,9],['forestMoss',3,10],['forestGrove',16,9]].forEach(([m,x,y])=>put(m,'I',[[x,y]]));[['trenchEast',10,6],['trenchWest',9,6],['forestCanopy',9,6],['forestMoss',10,6]].forEach(([m,x,y])=>put(m,'S',[[x,y]]))}
 Object.assign(SWITCHES,{'trenchEast:10:6':{title:'東潮渦流閘門',open:[['trenchEast',11,6],['trenchEast',12,6]],msg:'東潮渦流停止，露出深海寶庫！'},'trenchWest:9:6':{title:'西潮沉船舵輪',open:[['trenchWest',10,6],['trenchWest',11,6]],msg:'沉船舵輪轉動，西側暗流改道！'},'forestCanopy:9:6':{title:'樹冠風鈴陣',open:[['forestCanopy',10,6],['forestCanopy',11,6]],msg:'風鈴奏出旋律，樹冠高橋降下！'},'forestMoss:10:6':{title:'苔影根脈閥',open:[['forestMoss',11,6],['forestMoss',12,6]],msg:'根脈閥門開啟，通往古王根室的道路出現！'}});
 
@@ -587,19 +580,7 @@ async function checkEvolution(m){
  if(stage===1&&(m.lv||1)>=45&&m.evoPending!==1&&!m.evoPending)m.evoPending=2;
  if(m.evoPending&&!m.evoDeferred)await runPendingEvolution(m)
 }
-const ENHANCE_RECIPES={
- '深海龍鱗':{n:'鱗片強化',cost:300,effect:m=>{m.def+=3;m.spd+=3;return '防禦與特防提升了！'}},
- '古王樹果':{n:'樹果精華',cost:250,effect:m=>{m.max+=10;m.hp+=10;return '最大體力提升了！'}},
-	 '王室遺物':{n:'遺物加持',cost:400,effect:m=>{m.atk+=4;m.spa+=4;return '攻擊與特攻提升了！'}},
-	 '夢境晶核':{n:'核心共鳴',cost:500,effect:m=>{m.speed+=5;return '速度提升了！'}},
-	 '電力核心':{n:'電能充溢',cost:450,effect:m=>{m.mv.forEach((mi,i)=>{if(MOVES[mi].y==='電')m.pp[i]=m.maxpp[i]=Math.min(30,(m.maxpp[i]||10)+5)});return '電屬性招式PP上限提升！'}},
-	 '深淵藻核':{n:'深淵呼吸器',cost:260,effect:m=>{m.equipment=(m.equipment||[]).concat('深淵呼吸器');m.max+=6;m.hp+=6;m.spd+=4;return '最大體力與特防提升！'}},
-	 '星鰩珊瑚':{n:'星鰩護腕',cost:300,effect:m=>{m.equipment=(m.equipment||[]).concat('星鰩護腕');m.def+=3;m.speed+=2;return '防禦與速度提升！'}},
-	 '潮汐獠牙':{n:'潮汐長牙',cost:360,effect:m=>{m.equipment=(m.equipment||[]).concat('潮汐長牙');m.atk+=5;return '攻擊提升，水屬性力量變得更集中！'}},
-	 '苔光露珠':{n:'苔光披風',cost:280,effect:m=>{m.equipment=(m.equipment||[]).concat('苔光披風');m.spd+=4;m.love=Math.min(100,(m.love||0)+5);return '特防與親密度提升！'}},
-	 '月蛾粉晶':{n:'月紋護符',cost:340,effect:m=>{m.equipment=(m.equipment||[]).concat('月紋護符');m.spa+=4;return '特攻提升，光屬性招式更加穩定！'}},
-	 '古樹鹿角':{n:'古樹冠冕',cost:420,effect:m=>{m.equipment=(m.equipment||[]).concat('古樹冠冕');m.max+=12;m.hp+=12;m.def+=3;return '最大體力與防禦大幅提升！'}}
-	};
+const ENHANCE_RECIPES=ITEM_CATALOG.recipes;
 async function craftMenu(){
  S.mode='event';
  for(;;){
@@ -619,7 +600,8 @@ async function craftMenu(){
  }
  S.mode='map';
 }
-async function shopTalk(){S.mode='event';const I=[['素材強化',null,craftMenu],['普通飼料',15,()=>BAG.feed++],['高級飼料',80,()=>BAG.superFeed++],['補血藥',40,()=>BAG.heal=(BAG.heal||0)+1],['脫逃繩',70,()=>BAG.rope=(BAG.rope||0)+1],['避怪藥水100',60,()=>BAG.rep100++],['避怪藥水200',100,()=>BAG.rep200++],['避怪藥水400',180,()=>BAG.rep400++]];
+const SHOP_ACTIONS={craft:craftMenu,feed:()=>BAG.feed++,superFeed:()=>BAG.superFeed++,heal:()=>BAG.heal=(BAG.heal||0)+1,rope:()=>BAG.rope=(BAG.rope||0)+1,repel100:()=>BAG.rep100++,repel200:()=>BAG.rep200++,repel400:()=>BAG.rep400++};
+async function shopTalk(){S.mode='event';const I=ITEM_CATALOG.shop.map(x=>[x.name,x.cost,SHOP_ACTIONS[x.action]]);
  for(;;){S.prompt=`雜貨店\n金幣：${BAG.coins}\n補血藥回40`;const c=await choose([...I.map(x=>x[1]===null?x[0]:`${x[0]}　${x[1]}`),'離開'],1,'right',true);if(c<0||c===I.length)break;const it=I[c];if(it[1]===null){await it[2]();S.mode='event';continue}if(BAG.coins<it[1]){await say('金幣不夠！');continue}BAG.coins-=it[1];it[2]();await say('購買成功！')}S.mode='map'}
 async function questTalk(N){const q=QUESTS[N.q];S.mode='event';const key='q:'+N.q;if(!q){S.mode='map';return}if(!FL[key]){await say(q.offer);if(await choose(['接受任務','先等等'],1,'right')===0){FL[key]='active';await say('任務已加入！可以按 B 開啟任務查看進度。')}}else if(FL[key]==='active'){if(q.done()){FL[key]='done';await say(q.doneText);await q.give();await say('支線任務完成！')}else await say(q.progress())}else await say('這項任務已經完成了，謝謝你的幫忙！');S.mode='map'}
 async function talkBase(N){
