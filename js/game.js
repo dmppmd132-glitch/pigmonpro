@@ -205,7 +205,31 @@ ENEMIES.push(...CREATURE_DATA.enemies.yuTuTu.map(e=>createEnemy(e)));
 MOVES.push(...MOVE_DATA.moves.yuBase.map(m=>({...m})));SPECIES_MOVES[108]=[0,26,27,28];
 /* ===== 鈺兔兔專屬招式庫（玩家持有時套用）===== */
 const YU_SET=MOVE_DATA.moves.yuSpecial.map(m=>MOVES.push({...m})-1);
-function yuFix(m){if(m&&m.s===108){if(!m.mv||m.mv.join()!==YU_SET.join())m.mv=YU_SET.slice();m.maxpp=m.mv.map(()=>99);m.pp=m.mv.map(()=>99)}return m}
+const YU_TUTU_SPEED=999;
+const YU_STORY_MOVES=Object.fromEntries(MOVE_DATA.moves.yuStory.map(m=>[m.path,MOVES.push({...m})-1]));
+const yuStoryMove=()=>FL.yuStoryDone&&YU_STORY_MOVES[FL.yuPath];
+const yuMoveSet=()=>[...YU_SET,...(yuStoryMove()!=null?[yuStoryMove()]:[])];
+const yuActive=()=>party.find(m=>m.s===108);
+function yuFix(m){if(m&&m.s===108){m.speed=YU_TUTU_SPEED;const set=yuMoveSet();if(!m.mv||m.mv.join()!==set.join())m.mv=set.slice();m.maxpp=m.mv.map((i,k)=>m.maxpp?.[k]??MOVES[i]?.pp??99);m.pp=m.maxpp.slice()}return m}
+async function yuStoryTalk(){
+ S.mode='event';const y=yuActive();
+ if(!y){await say('老師：等鈺兔兔來到隊伍裡，星學堂的星光才會再次亮起。');S.mode='map';return}
+ if(!FL.yuMemory){
+  await say('老師：鈺兔兔，你還記得自己為什麼會來到星學堂嗎？');await say('鈺兔兔的耳尖亮起微光，腦海裡浮現一片落滿星塵的月夜。');
+  await say('老師：那道光正在等待你的選擇。你想讓鈺兔兔成為哪一種守護者？');
+  const c=await choose(['星光守護者','夢境守護者'],1,'right');FL.yuPath=c===0?'star':'dream';FL.yuMemory=1;y.love=Math.min(100,(y.love||0)+10);
+  await say(c===0?'鈺兔兔追著星光跳了一圈，額頭浮現小小星冠。':'鈺兔兔抱住月影打了個呵欠，夢境像柔軟的棉花一樣展開。');await say('老師：帶牠在夜晚前往月影森林吧，森林會告訴你下一步。');
+ }else if(!FL.yuNight){
+  await say('老師：星學堂的鐘聲還在等月影森林的回音。請在夜晚帶著鈺兔兔前往月影森林。');
+ }else if(!FL.yuStoryDone){
+  if((y.love||0)<50){await say(`老師：鈺兔兔還需要更多陪伴。（目前親密度 ${y.love||0}/50）`);await say('一起冒險、戰鬥或在城鎮行走，都能增加親密度。');S.mode='map';return}
+  await say('老師：你們已經聽見森林的答案了。現在，請決定鈺兔兔要守護哪一種力量。');
+  await say(FL.yuPath==='star'?'星光在窗邊凝成一枚耀眼的護符。':'月影在地板上鋪成一片溫柔的夢。');
+  FL.yuStoryDone=1;yuFix(y);y.love=Math.min(100,(y.love||0)+10);
+  await say(FL.yuPath==='star'?'鈺兔兔覺醒為星冠守護者！解鎖「星冠守護・星願落幕」，光屬性傷害提升。':'鈺兔兔覺醒為夢境守護者！解鎖「夢境擁抱・月兔安眠」，受到致命傷害時將以半血甦醒。');
+ }else await say(FL.yuPath==='star'?'鈺兔兔：星星都在替我們帶路！':'鈺兔兔：噓……讓大家做個好夢吧。');
+ S.mode='map';
+}
 const SQ=[['水系怪物最怕哪個屬性？',['火','電','暗'],1],['兔子的長耳朵有什麼用？',['散熱聽遠處','能飛行','變蘿蔔'],0],['光屬性對誰效果絕佳？',['火','冰','暗'],2]];
 async function teach(){S.mode='event';if(FL.yu){await say('老師：你是班上的第一名！鈺兔兔就拜託你照顧囉。');return}
  await say('老師：我要出三題！答案都藏在三位同學的話裡，去問問他們吧。');
@@ -213,7 +237,7 @@ async function teach(){S.mode='event';if(FL.yu){await say('老師：你是班上
  FL.yu=1;await say('三題全對！老師送你一位特別的同學——');const m=mon(108,16);if(party.length<6){party.push(m);await say('鈺兔兔加入了隊伍！')}else{pcBox.push(m);await say('隊伍滿了，已傳送到電腦盒子！')}
  dex.add(m.n);FL['s108']=1;await say(`獲得隱藏怪物「鈺兔兔」！圖鑑登錄！（${dex.size}/${ENEMIES.length}）`)}
 [[5,8,'小米','水系怪物最怕電屬性，被電到會麻麻的！'],[9,8,'阿福','兔子的長耳朵可以散熱，也能聽見很遠的聲音。'],[13,8,'小綠','光屬性最會對付暗屬性，暗系怪物都怕它！']].forEach(([x,y,n,t],i)=>{put('school','.',[[x,y]]);NPCS.push(mk('school',x,y,i+1,'st'+i,[`學生${n}：我來分享一個知識！`,t]))});
-put('school','.',[[9,5]]);NPCS.push(Object.assign(mk('school',9,5,3,'teacher',['老師：…']),{fn:teach}));
+ put('school','.',[[9,5]]);NPCS.push(Object.assign(mk('school',9,5,3,'teacher',['老師：…']),{fn:async()=>{if(!FL.yu)await teach();else await yuStoryTalk()}}));
 const EGG=[['forest',15,9,3,9,'月影森林','森林守護者：月亮最亮的夜晚，蘑菇會發光。能幫我找到「月光蘑菇」嗎？','月光蘑菇'],['route',3,5,17,10,'藍濱水族城','館員：水槽裡的小魚唱歌時掉了顆「珍珠貝殼」，能幫我找嗎？','珍珠貝殼'],['school',3,5,16,10,'星學堂','校工：操場角落埋著一枚「星星獎章」，能幫我挖出來嗎？','星星獎章'],['a2',3,5,16,10,'花語城','花園婆婆：花叢深處有一朵會發光的「發光花苞」。','發光花苞'],['a3',3,5,16,10,'雷鳴城','電工：我的「備用電池」掉在城裡的角落了。','備用電池'],['a4',3,5,16,10,'烈焰城','鐵匠：我的「火種寶石」弄丟了，就在城裡某處。','火種寶石'],['a5',3,5,16,10,'礦石城','礦工：我在岩縫間藏了一顆「彩虹礦石」。','彩虹礦石'],['a6',3,5,16,10,'冰晶城','雪人：我的「冰藍圍巾」被風吹到角落去了。','冰藍圍巾']];
 EGG.forEach(([m,nx,ny,ex,ey,cn,offer,item],i)=>{const k=`secret:${m}:${ex}:${ey}`;put(m,'.',[[nx,ny]]);put(m,'E',[[ex,ey]]);
  SECRETS[k]={title:item,lines:[`你在${cn}找到了「${item}」！`,'它閃閃發光，帶來好運！'],reward:['maxhp','exp','heal','exp','maxhp','heal','exp','maxhp'][i]};
@@ -752,7 +776,14 @@ const SECRET_REWARDS={
  ruinsbuff:async()=>{party.forEach(m=>{m.def=(m.def||8)+2;m.spd=(m.spd||8)+2});await say('隊伍防禦與特防提升了！')},
  dreambuff:async()=>{FL.dreamBuff=1;await say('光與暗屬性招式威力提升了！')},
  seabuff:async()=>{FL.seaBuff=1;party.forEach(m=>m.hp=m.max);await say('水屬性招式威力提升，隊伍恢復體力！')}
-};
+ };
+addArriveAfter(async ctx=>{
+ if(!FL.yuMemory||FL.yuNight||!yuActive()||ctx.map!=='forest'||!(WORLD.time>=18||WORLD.time<6))return;
+ const y=yuActive();FL.yuNight=1;y.love=Math.min(100,(y.love||0)+15);S.mode='event';
+ await say('夜色降臨，鈺兔兔忽然停下腳步。月影森林深處傳來熟悉的星鈴聲。');
+ await say(FL.yuPath==='star'?'星光從樹梢落下，替鈺兔兔照出一條通往星冠的路。':'薄霧包住鈺兔兔，牠聽見森林裡每一個正在做夢的生命。');
+ await say('鈺兔兔的親密度提升了！回星學堂找老師，完成最後的覺醒。');S.mode='map';
+});
 addArriveTile(async ctx=>{
  if(ctx.tile==='E'){
   const q=SECRETS[`secret:${ctx.map}:${ctx.x}:${ctx.y}`];
@@ -782,8 +813,8 @@ const wildPool=()=>{if(cur.startsWith('LL')){const n=+cur.match(/^LL(\d+)/)[1],i
 const ensureBattleMon=m=>{statInit(m);m.status=m.status||'';return m};
 const inflict=(m,st,ch=.16)=>{if(!m.status&&Math.random()<ch){m.status=st;return true}return false};
 const statusTick=async m=>{if(!m.status)return true;if(m.status==='burn'||m.status==='poison'){const d=Math.max(1,Math.round(m.max*(m.status==='burn'?.06:.08)));m.hp=Math.max(0,m.hp-d);await say(`${m.n}因${STATUS_NAMES[m.status]}受到${d}點傷害！`)}if(m.status==='paralyze'&&Math.random()<.25){await say(`${m.n}因麻痺無法行動！`);return false}if(m.status==='freeze'&&Math.random()<.65){await say(`${m.n}仍在冰凍中！`);return false}if(m.status==='sleep'&&Math.random()<.7){await say(`${m.n}正在睡覺！`);return false}if(Math.random()<.12)m.status='';return true};
-const calcDamage=(M,A,D)=>{const special=!!M.y,atk=special?(A.spa||A.atk):A.atk,def=special?(D.spd||D.def):D.def;let d=Math.max(1,Math.round((M.p||A.atk)*(A.pwr||1)*(atk/Math.max(1,def))));if(WEATHER_TYPE[WORLD.weather]===M.y)d=Math.round(d*1.2);if((M.y==='火'&&FL.volcBuff)||(M.y==='冰'&&FL.iceBuff)||(FL.dreamBuff&&(M.y==='光'||M.y==='暗'))||(FL.seaBuff&&M.y==='水'))d=Math.round(d*1.15);const night=WORLD.time>=18||WORLD.time<6;if((night&&M.y==='暗')||(!night&&M.y==='光'))d=Math.round(d*1.1);const bossCrit=(B&&B.e&&B.e.s>=finalBossBase)?(BOSS_BALANCE[B.e.s]?.crit||.08):.06;const crit=Math.random()<Math.min(.25,bossCrit+((A.speed||5)-(D.speed||5))*.01);return {d:Math.max(1,Math.round(d*(crit?2:1))),crit}};
-async function enemyAct(){const E=B.e;if(!(await statusTick(E)))return true;if(!E.phase&&E.hp<E.max*.3&&E.s>=finalBossBase){E.phase=1;E.atk+=5;E.def+=5;E.speed+=5;await say(`${E.n}發出了震天的咆哮，進入了第二階段！能力大幅提升！`)}const ei=pick(E.mv||[0]),EM=MOVES[ei];await say(`${E.n}${statusLabel(E)}使出了${moveLabel(ei)}！`);if(EM.t==='d'){if(E.st>-3){E.st--;await say(`${pig.n}的攻擊被壓制了！`)}else await say('但是沒有更多效果了！')}else if(EM.t==='h'){await legendFx(ei,'e');const h=6+E.lv;E.hp=Math.min(E.max,E.hp+h);await say(`${E.n}恢復了${h}點體力！`)}else if(Math.random()>.1){const mx=mult(EM.y||E.t,pig.t),z=calcDamage(EM,E,pig),d=Math.max(1,Math.round(z.d*mx*(.8+Math.random()*.5)*Math.max(.4,1+.25*E.st)));if(z.crit)await say('對手使出會心一擊！');if(EM.y==='火')inflict(pig,'burn');if(EM.y==='毒')inflict(pig,'poison');if(EM.y==='電')inflict(pig,'paralyze');if(EM.y==='冰')inflict(pig,'freeze');pig.hp=Math.max(0,pig.hp-d);if(ei===PIG_ULTIMATE_MOVE){B.fx={kind:'ultimate',t:S.t,cx:40,cy:68};await sleep(1200);B.fx=null}else if(ei===PIG_EXCLUSIVE_MOVE){B.fx={t:S.t,cx:40,cy:68};await sleep(700);B.fx=null}else await legendFx(ei,'e');await blink('p');await say(`${pig.n}受到了${d}點傷害！`);if(mx!==1)await say(mx>1?'效果絕佳！':'效果不太好……')}else await say('但是沒有打中！');if(pig.hp<=0&&pig.s===108&&B&&!B.yuRev){B.yuRev=1;pig.hp=Math.ceil(pig.max/2);pig.dh=pig.hp;pig.status='';await say(`${pig.n}的復活被動發動！回復了一半體力，再度站了起來！`);return true}if(pig.hp<=0){await say(`${pig.n}倒下了……`);if(party.some(m=>m.hp>0)){while(!(await swap(1)));return true}await say('隊伍全軍覆沒，被送回了豬窩。');party.forEach(m=>{m.hp=m.max;m.status=''});pig=party[0];pig.dh=pig.hp;setMap('town');Pl.x=3;Pl.y=4;return false}return true}
+const calcDamage=(M,A,D)=>{const special=!!M.y,atk=special?(A.spa||A.atk):A.atk,def=special?(D.spd||D.def):D.def;let d=Math.max(1,Math.round((M.p||A.atk)*(A.pwr||1)*(atk/Math.max(1,def))));if(WEATHER_TYPE[WORLD.weather]===M.y)d=Math.round(d*1.2);if((M.y==='火'&&FL.volcBuff)||(M.y==='冰'&&FL.iceBuff)||(FL.dreamBuff&&(M.y==='光'||M.y==='暗'))||(FL.seaBuff&&M.y==='水'))d=Math.round(d*1.15);if(A.s===108&&FL.yuStoryDone&&FL.yuPath==='star'&&M.y==='光')d=Math.round(d*1.15);const night=WORLD.time>=18||WORLD.time<6;if((night&&M.y==='暗')||(!night&&M.y==='光'))d=Math.round(d*1.1);const bossCrit=(B&&B.e&&B.e.s>=finalBossBase)?(BOSS_BALANCE[B.e.s]?.crit||.08):.06;const crit=Math.random()<Math.min(.25,bossCrit+((A.speed||5)-(D.speed||5))*.01);return {d:Math.max(1,Math.round(d*(crit?2:1))),crit}};
+async function enemyAct(){const E=B.e;if(!(await statusTick(E)))return true;if(!E.phase&&E.hp<E.max*.3&&E.s>=finalBossBase){E.phase=1;E.atk+=5;E.def+=5;E.speed+=5;await say(`${E.n}發出了震天的咆哮，進入了第二階段！能力大幅提升！`)}const ei=pick(E.mv||[0]),EM=MOVES[ei];await say(`${E.n}${statusLabel(E)}使出了${moveLabel(ei)}！`);if(EM.t==='d'){if(E.st>-3){E.st--;await say(`${pig.n}的攻擊被壓制了！`)}else await say('但是沒有更多效果了！')}else if(EM.t==='h'){await legendFx(ei,'e');const h=6+E.lv;E.hp=Math.min(E.max,E.hp+h);await say(`${E.n}恢復了${h}點體力！`)}else if(Math.random()>.1){const mx=mult(EM.y||E.t,pig.t),z=calcDamage(EM,E,pig),d=Math.max(1,Math.round(z.d*mx*(.8+Math.random()*.5)*Math.max(.4,1+.25*E.st)));if(z.crit)await say('對手使出會心一擊！');if(EM.y==='火')inflict(pig,'burn');if(EM.y==='毒')inflict(pig,'poison');if(EM.y==='電')inflict(pig,'paralyze');if(EM.y==='冰')inflict(pig,'freeze');pig.hp=Math.max(0,pig.hp-d);if(ei===PIG_ULTIMATE_MOVE){B.fx={kind:'ultimate',t:S.t,cx:40,cy:68};await sleep(1200);B.fx=null}else if(ei===PIG_EXCLUSIVE_MOVE){B.fx={t:S.t,cx:40,cy:68};await sleep(700);B.fx=null}else await legendFx(ei,'e');await blink('p');await say(`${pig.n}受到了${d}點傷害！`);if(mx!==1)await say(mx>1?'效果絕佳！':'效果不太好……')}else await say('但是沒有打中！');if(pig.hp<=0&&pig.s===108&&B&&!B.yuRev){B.yuRev=1;const ratio=FL.yuStoryDone&&FL.yuPath==='dream'?.7:.5;pig.hp=Math.ceil(pig.max*ratio);pig.dh=pig.hp;pig.status='';await say(`${pig.n}的${FL.yuStoryDone&&FL.yuPath==='dream'?'夢境擁抱':'復活'}被動發動！回復了${Math.round(ratio*100)}%體力，再度站了起來！`);return true}if(pig.hp<=0){await say(`${pig.n}倒下了……`);if(party.some(m=>m.hp>0)){while(!(await swap(1)));return true}await say('隊伍全軍覆沒，被送回了豬窩。');party.forEach(m=>{m.hp=m.max;m.status=''});pig=party[0];pig.dh=pig.hp;setMap('town');Pl.x=3;Pl.y=4;return false}return true}
 const isRareMon=e=>{const i=ENEMIES.indexOf(e);return i===9||i===11||(i>=95&&i<=104)||(typeof BIOME_IDS!=='undefined'&&BIOME_IDS.includes(i))};
 const pickWild=W=>{if(W)return pick([ENEMIES[3],ENEMIES[6]]);const p=wildPool(),r=p.filter(isRareMon),c=p.filter(e=>!isRareMon(e));if(!r.length||!c.length)return pick(p);return Math.random()<(FL.rare?.1:.05)?pick(r):pick(c)};
 async function battle(T,W,L){
@@ -794,7 +825,7 @@ async function battle(T,W,L){
  await say(T?`${T.n}派出了${E.n}！`:`野生的${E.n}出現了！`);
  let over=false;
  while(!over){
-  if(!B.preempt){B.preempt=1;ensureBattleMon(pig);if(E.speed>pig.speed&&!(await enemyAct())){over=true;break}}
+  if(!B.preempt){B.preempt=1;ensureBattleMon(pig);if(E.speed>pig.speed&&pig.s!==108&&!(await enemyAct())){over=true;break}}
   S.prompt='小豬要\n怎麼做？';
   const c=await choose(['戰鬥','飼料','隊伍','逃跑'],2,'full');
   if(c===0){
