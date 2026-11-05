@@ -205,7 +205,8 @@ ENEMIES.push(...CREATURE_DATA.enemies.yuTuTu.map(e=>createEnemy(e)));
 MOVES.push(...MOVE_DATA.moves.yuBase.map(m=>({...m})));SPECIES_MOVES[108]=[0,26,27,28];
 /* ===== 鈺兔兔專屬招式庫（玩家持有時套用）===== */
 const YU_SET=MOVE_DATA.moves.yuSpecial.map(m=>MOVES.push({...m})-1);
-function yuFix(m){if(m&&m.s===108){if(!m.mv||m.mv.join()!==YU_SET.join())m.mv=YU_SET.slice();m.maxpp=m.mv.map(()=>99);m.pp=m.mv.map(()=>99)}return m}
+const YU_TUTU_SPEED=999;
+function yuFix(m){if(m&&m.s===108){m.speed=YU_TUTU_SPEED;if(!m.mv||m.mv.join()!==YU_SET.join())m.mv=YU_SET.slice();m.maxpp=m.mv.map(()=>99);m.pp=m.mv.map(()=>99)}return m}
 const SQ=[['水系怪物最怕哪個屬性？',['火','電','暗'],1],['兔子的長耳朵有什麼用？',['散熱聽遠處','能飛行','變蘿蔔'],0],['光屬性對誰效果絕佳？',['火','冰','暗'],2]];
 async function teach(){S.mode='event';if(FL.yu){await say('老師：你是班上的第一名！鈺兔兔就拜託你照顧囉。');return}
  await say('老師：我要出三題！答案都藏在三位同學的話裡，去問問他們吧。');
@@ -794,7 +795,7 @@ async function battle(T,W,L){
  await say(T?`${T.n}派出了${E.n}！`:`野生的${E.n}出現了！`);
  let over=false;
  while(!over){
-  if(!B.preempt){B.preempt=1;ensureBattleMon(pig);if(E.speed>pig.speed&&!(await enemyAct())){over=true;break}}
+  if(!B.preempt){B.preempt=1;ensureBattleMon(pig);if(E.speed>pig.speed&&pig.s!==108&&!(await enemyAct())){over=true;break}}
   S.prompt='小豬要\n怎麼做？';
   const c=await choose(['戰鬥','飼料','隊伍','逃跑'],2,'full');
   if(c===0){
