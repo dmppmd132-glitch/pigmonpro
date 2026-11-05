@@ -2,6 +2,8 @@
 
 主要圖鑑、地區追加怪物與稀有／傳說索引集中在 `catalog.js` 的 `window.PIGMON_CREATURE_DATA`。招式、屬性克制和學習資料請編輯 `../moves/catalog.js`；道具和素材請編輯 `../items/catalog.js`。此檔只保存怪物資料，不放戰鬥規則或繪圖程式。
 
+「鈺兔兔」使用 `game.js` 內的 `yuTuTu` 專屬彩色像素精靈，資料以 `cuteSp` 的 `ac:5` 觸發；目前只有這個角色使用此外型。一般新增怪物請使用既有精靈，不要重複指定 `ac:5`。
+
 ## 新增一般怪物
 
 - `enemies.base` 與 `enemies.legends`：起始怪物與基本傳說怪物。每筆有 `n`（名稱）、`t`（屬性）、`m`（圖鑑編號）、`hp`、`atk` 與 `sprite`。

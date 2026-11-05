@@ -5,7 +5,7 @@ window.PIGMON_CREATURE_DATA = {
     legends: [{n:'月兔仙子',t:'光',m:16,hp:70,atk:13,sprite:'bunny'},{n:'星耀豬皇',t:'光',m:17,hp:78,atk:14,sprite:'cutePig'},{n:'雲海兔王',t:'水',m:18,hp:74,atk:13,sprite:'bunny'},{n:'赤焰豬神',t:'火',m:19,hp:82,atk:15,sprite:'cutePig'}],
     v2Legends: [{n:'雪月兔神',t:'冰',m:20,hp:88,atk:16,sprite:'moonB'},{n:'雷霆豬王',t:'電',m:20,hp:92,atk:17,sprite:'boltP'}],
     dreamLegend: [{n:'夢幻兔豬皇',t:'光',m:30,hp:130,atk:22,sprite:'dream'}],
-    yuTuTu: [{n:'鈺兔兔',t:'光',m:30,hp:60,atk:11,sprite:{kind:'cuteSp',args:[true,1,true]}}],
+    yuTuTu: [{n:'鈺兔兔',t:'光',m:30,hp:60,atk:11,sprite:{kind:'cuteSp',args:[true,5,true]}}],
     mine: [{n:'礦坑鼴鼠',t:'土',m:31,hp:38,atk:9,sprite:'rock'},{n:'晶簇兔',t:'冰',m:32,hp:34,atk:10,sprite:{kind:'cuteSp',args:[true,4,true]}},{n:'熔岩泥豬',t:'火',m:33,hp:42,atk:12,sprite:'flame'},{n:'火山翼蝠',t:'火',m:34,hp:36,atk:11,sprite:'wolf'}],
     iceLab: [{n:'冰晶鼴兔',t:'冰',m:35,hp:40,atk:11,sprite:{kind:'cuteSp',args:[true,2,true]}},{n:'霜花豬',t:'冰',m:36,hp:45,atk:10,sprite:'cutePig'},{n:'實驗史萊姆',t:'毒',m:37,hp:39,atk:12,sprite:'slime'},{n:'電磁兔',t:'電',m:38,hp:35,atk:13,sprite:{kind:'cuteSp',args:[true,3,false]}}],
     ruinsDream: [{n:'遺跡石像',t:'土',m:39,hp:50,atk:14,sprite:'rock'},{n:'星紋兔',t:'光',m:40,hp:43,atk:12,sprite:{kind:'cuteSp',args:[true,2,false]}},{n:'夢境棉花',t:'光',m:41,hp:46,atk:13,sprite:'slime'},{n:'幻夢豬',t:'暗',m:42,hp:48,atk:14,sprite:'cutePig'}],

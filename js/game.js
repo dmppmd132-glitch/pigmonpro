@@ -136,7 +136,28 @@ GYMS.forEach((g,i)=>{const sp=ENEMIES[g.s],tp=sp.t,m='g'+i;
  NPCS.push(mk(m,6,4,2,'t'+i,['學徒：想見館主？先過我這關！'],{n:'學徒',lv:g.lv-2,b:sp},['學徒：館主就在最裡面。'],'學徒：館主就在最裡面。'),
  mk(m,4,1,3,'boss'+i,[`${tp}系館主：我是第${i+1}道館的館主！`,'讓我看看你的隊伍有多強！'],{n:`${tp}系館主`,lv:g.lv,b:{...sp,n:sp.n+'王',hp:sp.hp+10,atk:sp.atk+1}},['館主：太精彩了！徽章送給你！'],'館主：你是最強的訓練豬！'))});
 /* ---- v2 expansion ---- */
-const cuteSp=(rb,ac,hu)=>(cx,cy)=>{const h=hu?1:0;ell(cx,cy+8,17,13,3);ell(cx,cy+8,16,12,h);
+function yuTuTu(cx,cy){
+ const px=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(cx+x,cy+y,w,h)};
+ const oval=(x,y,rx,ry,color)=>{ctx.fillStyle=color;for(let dy=-ry;dy<=ry;dy++){const w=Math.round(rx*Math.sqrt(1-dy*dy/(ry*ry+.01)));ctx.fillRect(cx+x-w,cy+y+dy,2*w+1,1)}};
+ const star=(x,y,color)=>{px(x-1,y,3,1,color);px(x,y-2,1,5,color);px(x-2,y-1,5,3,color)};
+ const ink='#493052',cream='#fff4fa',rose='#ff82b5',blush='#ffb2cf',lilac='#c49af4',aqua='#72dce4',gold='#ffda70';
+ oval(0,25,17,3,'#e8c9df');
+ oval(-8,-17,5,15,ink);oval(-8,-17,3,13,cream);oval(-8,-17,2,10,rose);px(-9,-29,2,4,'#fff');
+ oval(8,-16,5,14,ink);oval(8,-16,3,12,cream);oval(8,-16,2,9,aqua);px(7,-27,2,4,'#fff');
+ oval(-19,13,5,5,ink);oval(-19,13,3,3,cream);px(-20,12,2,2,rose);
+ oval(0,13,17,12,ink);oval(0,12,15,10,lilac);oval(0,13,12,8,cream);
+ oval(-8,22,5,4,ink);oval(8,22,5,4,ink);oval(-8,21,3,2,rose);oval(8,21,3,2,rose);
+ oval(-13,10,4,5,ink);oval(13,10,4,5,ink);oval(-13,10,3,4,cream);oval(13,10,3,4,cream);
+ px(-11,6,4,3,aqua);px(-7,6,4,3,'#9ce49a');px(-3,6,4,3,gold);px(1,6,4,3,'#ff9ab5');px(5,6,4,3,lilac);px(-2,5,4,4,'#fff');px(-1,6,2,2,aqua);
+ oval(0,-2,15,12,ink);oval(0,-3,13,10,cream);oval(0,-2,11,8,'#fff9fc');
+ oval(-5,-4,2,3,ink);oval(5,-4,2,3,ink);px(-6,-6,1,1,'#fff');px(4,-6,1,1,'#fff');
+ oval(-9,2,3,1,blush);oval(9,2,3,1,blush);oval(0,2,4,3,rose);px(-2,1,1,1,'#fff');px(-2,2,1,1,ink);px(1,2,1,1,ink);
+ px(-1,6,2,1,ink);px(-2,7,1,1,ink);px(1,7,1,1,ink);
+ px(-4,-15,2,3,gold);px(-2,-17,2,4,gold);px(0,-15,2,3,gold);px(2,-17,2,4,gold);px(4,-15,2,3,gold);px(-4,-12,10,2,gold);px(-1,-13,3,2,aqua);
+ px(-14,-18,3,2,gold);px(-16,-16,3,2,rose);px(-13,-15,3,2,aqua);
+ star(-23,-8,'#ffdb71');star(23,-13,aqua);star(20,8,'#ff9aba');
+}
+const cuteSp=(rb,ac,hu)=>(cx,cy)=>{if(ac===5){yuTuTu(cx,cy);return}const h=hu?1:0;ell(cx,cy+8,17,13,3);ell(cx,cy+8,16,12,h);
  if(rb){[-8,8].forEach(o=>{ell(cx+o,cy-13,4,13,3);ell(cx+o,cy-13,2,10,1)})}else{[-14,7].forEach(o=>{R(cx+o,cy-10,7,6,3);R(cx+o+1,cy-9,5,4,1)})}
  ell(cx,cy-2,12,9,3);ell(cx,cy-2,11,8,h);R(cx-6,cy-4,2,3,3);R(cx+4,cy-4,2,3,3);R(cx-9,cy,3,2,2);R(cx+6,cy,3,2,2);
  if(rb)R(cx-1,cy,2,2,2);else{ell(cx,cy+1,3,2,2);R(cx-1,cy+1,1,1,3);R(cx+1,cy+1,1,1,3)}
