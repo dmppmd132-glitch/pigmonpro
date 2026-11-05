@@ -6,9 +6,11 @@
 
 - `index.html`：遊戲頁面與 Canvas、控制介面
 - `css/style.css`：版面、按鈕與色彩樣式
-- `js/game.js`：遊戲地圖、繪圖、操作與遊戲邏輯
+- `js/game.js`：繪圖、操作、事件與遊戲邏輯
+- `js/maps/layouts.js`：固定地圖格線與室內版型
+- `js/maps/README.md`：地圖資料格式與新增方式
 
-新增或調整功能時，優先修改對應的 CSS 或 JavaScript 檔；頁面入口與依賴路徑集中在 `index.html`。
+新增或調整遊戲地圖時，先編輯 `js/maps/layouts.js`；遊戲執行邏輯則留在 `js/game.js`。頁面入口與依賴路徑集中在 `index.html`。
 
 ## 本機遊玩
 

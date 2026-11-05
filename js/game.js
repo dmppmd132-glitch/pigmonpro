@@ -1,3 +1,4 @@
+const MAP_LAYOUTS=window.PIGMON_MAP_LAYOUTS;
 const P4=['#fff0f6','#ffb3cf','#d9588a','#5a1233'];
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const FONT="'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif";
@@ -9,12 +10,12 @@ const fitText=(s,max,z=10)=>{ctx.font=z+'px '+FONT;let t=String(s);while(t.lengt
 const box=(x,y,w,h)=>{R(x,y,w,h,3);R(x+1,y+1,w-2,h-2,2);R(x+2,y+2,w-4,h-4,0)};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),pick=a=>a[rnd(0,a.length-1)];
-const TOWN=["####################","#..................#","#.HHH....gggggg....#","#.HhH....gggggg..w.#","#........gggggg..ww#","#..........gg.....w#","#.....##...gg......#","#.....##...........#","#..gggg.......gggg.#","#..gggg.......gggg.#","#..gggg....##..gg..#","#..........##.....w#","#.....gggg.........#","#.....gggg.....ww..#","#..................#","####################"];
+const TOWN=MAP_LAYOUTS.town;
 const D={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 TOWN[14]=TOWN[14].slice(0,19)+'.';
 TOWN[12]=TOWN[12].slice(0,16)+'E'+TOWN[12].slice(17);
-const ROUTE=["####################","#gggg.....ggg......#","#gggg.....ggg.HHH..#","#gggg.....ggg.HGH..#","#.............gg...#","#..................#","...........ww......#","#gggg......ww.gggg.#","#gggg.........gggg.#","#gggg..............#","#..................#","####################"];
-const GYM=["HHHHHHHHHH","H........H","H........H","H........H","H........H","H........H","H........H","H........H","HHHHGHHHHH"];
+const ROUTE=MAP_LAYOUTS.route;
+const GYM=MAP_LAYOUTS.gym;
 const MAPS={town:TOWN,route:ROUTE,gym:GYM};
 const WARP={'town,19,14':['route',1,6],'route,0,6':['town',18,14],'route,15,3':['gym',4,7],'gym,4,8':['route',15,4]};
 let MAP=TOWN,MW=20,MH=16,cur='town';
@@ -204,7 +205,7 @@ const legTile=id=>(x,y)=>{const r=ENEMIES[id].n.includes('兔');ell(x+8,y+10,6,5
  put(m,'G',[[ex,ey]]);WARP[`${m},${ex},${ey}`]=[n,5,8];WARP[`${n},5,9`]=[m,ex,ey+1];
  NPCS.push(Object.assign(mk(n,5,3,3,'leg'+id,['…']),{sp:legTile(id),hide:1,fn:async()=>{S.mode='event';await say(`${q.n}靜靜地注視著你……`);await say(`${q.n}發出震天的怒吼！`);await battle(0,0,id)}}))});
 put('town','H',[[14,6],[16,6],[14,7],[16,7]]);put('town','T',[[15,6]]);put('town','S',[[15,7]]);put('town','.',[[15,8]]);
-MAPS.shop=['#########','#.......#','#.......#','#.......#','#.......#','#.......#','#.......#','#.......#','####.####'];put('shop','H',[[3,3],[5,3]]);
+MAPS.shop=MAP_LAYOUTS.shop;put('shop','H',[[3,3],[5,3]]);
 Object.assign(WARP,{'town,15,7':['shop',4,7],'shop,4,8':['town',15,8]});Object.assign(NPCS.find(n=>n.shop),{m:'shop',x:4,y:3});
 for(const m of ['route','school','a2','a3','a4','a5','a6'])NPCS.push(mk(m,m==='route'?6:5,5,2,'shop_'+m,['雜貨店老闆：歡迎光臨！'],null,null,null,null,null,'store'));
 
@@ -217,10 +218,8 @@ RARE.forEach((i,k)=>{const e=ENEMIES[i],big=!(i>=95&&i<=104),o=[0,1,2].map(j=>TM
 const movesFor=(s,lv)=>{const b=movesFor0(s,lv),T=LEARN2[s];if(!T||SPECIES_MOVES[s])return b;const a=[...new Set([...b,...Object.keys(T).filter(l=>+l<=lv).sort((x,y)=>x-y).map(l=>T[l])])];return a.length>4?[a[0],...a.slice(-3)]:a};
 /* ---- mine / volcano interior expansion ---- */
 PAL.mine=['#efe8dc','#c4a77d','#76533b','#291c19'];PAL.volcIn=['#fff0df','#ff8e51','#a52b20','#3a0b0b'];
-const mineMap=[
-'####################','#.....#.....#......#','#.....#.....#......#','#.ggg...gg..#......#','#.....#.....#......#','#.....#.....#......#','#.gggg#.....#gggg..#','#.....#.....#......#','##########.#########','#.....#.....#......#','#.ggg.#.....#ggg...#','#..................#','####################'];
-const volcInMap=[
-'####################','#.gg.#.gg....#ggg..#','#....#.......#.....#','#....#.......#.....#','#.gg...gg....#gg...#','#....#.......#.....#','#########.##########','#....#.......#.....#','#....#.............#','#.ggg#.gg....#ggg..#','#....#.......#.....#','#.gg...gg.....ggg..#','####################'];
+const mineMap=MAP_LAYOUTS.mine;
+const volcInMap=MAP_LAYOUTS.volcIn;
 MAPS.mine=mineMap;MAPS.volcIn=volcInMap;
 const mineBase=ENEMIES.length;
 const mineMoves=MOVES.push({n:'鑿岩猛擊',p:30,a:.9,y:'土'},{n:'晶簇護盾',t:'d'},{n:'熔岩爆衝',p:34,a:.88,y:'火'},{n:'火山回音',p:27,a:.95,y:'火'})-4;
@@ -240,7 +239,7 @@ const mineWild=()=>MINE_IDS.map(i=>ENEMIES[i]),volcInWild=()=>VOLCIN_IDS.map(i=>
 NPCS.push(mk('a5',11,10,2,'qmine',['礦工：地下礦坑的礦脈最近一直發出奇怪的光。'],null,null,null,null,'mine'));NPCS.push(mk('volc',11,8,2,'qvolcIn',['火山觀測員：火山內部的心焰快要熄滅了。'],null,null,null,null,'volcIn'));
 /* ---- ice cave / abandoned lab expansion ---- */
 PAL.iceCave=['#f3fbff','#b8e9ff','#4389b5','#17324b'];PAL.lab=['#edf1f2','#aab6bd','#4c5b63','#172126'];
-const iceCaveMap=['####################', '#.....#......#.....#', '#.ggg.#ggg...#ggg..#', '#.....#......#.....#', '#............#.....#', '#.ggg.#gg....#ggg..#', '#.....#......#.....#', '#.....#......#.....#', '##########.#########', '#.....#......#.....#', '#.ggg.#gg....#ggg..#', '#..................#', '####################'];const labMap=['####################', '#....#........#....#', '#.gg.#.gg.....#gg..#', '#.............#....#', '#.gg.#.gg.....#gg..#', '#....#........#....#', '#########.##########', '#....#........#....#', '#....#........#....#', '#.ggg#.gg......gg..#', '#....#........#....#', '#.gg...gg......gg..#', '####################'];MAPS.iceCave=iceCaveMap;MAPS.lab=labMap;
+const iceCaveMap=MAP_LAYOUTS.iceCave;const labMap=MAP_LAYOUTS.lab;MAPS.iceCave=iceCaveMap;MAPS.lab=labMap;
 const newBase=ENEMIES.length;
 const newMoves=MOVES.push({n:'冰棱迴旋',p:32,a:.9,y:'冰'},{n:'霜花護體',t:'d'},{n:'電磁脈衝',p:31,a:.92,y:'電'},{n:'毒液試管',p:29,a:.95,y:'毒'})-4;
 ENEMIES.push({n:'冰晶鼴兔',t:'冰',m:35,hp:40,atk:11,d:cuteSp(true,2,true)},{n:'霜花豬',t:'冰',m:36,hp:45,atk:10,d:cutePig},{n:'實驗史萊姆',t:'毒',m:37,hp:39,atk:12,d:slime},{n:'電磁兔',t:'電',m:38,hp:35,atk:13,d:cuteSp(true,3,false)});
@@ -268,7 +267,7 @@ const iceWild=()=>ICE_IDS.map(i=>ENEMIES[i]),labWild=()=>LAB_IDS.map(i=>ENEMIES[
 NPCS.push(mk('a6',11,10,2,'qice',['守洞人：冰晶洞窟裡的月輪正在發光。'],null,null,null,null,'iceCave'));NPCS.push(mk('school',11,10,2,'qlab',['研究員：廢棄研究所的主機似乎還能運作。'],null,null,null,null,'lab'));
 /* ---- ancient ruins / dream space expansion ---- */
 PAL.ruins=['#f3ecdc','#d6bd83','#90713f','#3b2a17'];PAL.dreamSpace=['#f4eaff','#c9a5f5','#7650b5','#241344'];
-const ruinsMap=['####################', '#.....#......#.....#', '#.gg..#.gg...#ggg..#', '#............#.....#', '#.gg..#gg.....gg...#', '#.....#......#.....#', '####.##########.####', '#.....#......#.....#', '#............#.....#', '#.gg..#gg.....ggg..#', '#.....#......#.....#', '#.gg...gg.....gg...#', '####################'];const dreamSpaceMap=['####################', '#.gg.#.gg.....#gg..#', '#....#........#....#', '#....#.............#', '#.gg...gg.....#gg..#', '#....#........#....#', '########.##.########', '#....#........#....#', '#....#.............#', '#.ggg..gg.....#gg..#', '#....#........#....#', '#.gg...gg......gg..#', '####################'];MAPS.ruins=ruinsMap;MAPS.dreamSpace=dreamSpaceMap;
+const ruinsMap=MAP_LAYOUTS.ruins;const dreamSpaceMap=MAP_LAYOUTS.dreamSpace;MAPS.ruins=ruinsMap;MAPS.dreamSpace=dreamSpaceMap;
 const extraBase=ENEMIES.length;
 const extraMoves=MOVES.push({n:'遺跡震擊',p:36,a:.88,y:'土'},{n:'星紋結界',t:'d'},{n:'夢境泡泡',p:34,a:.94,y:'光'},{n:'幻夢吞噬',p:38,a:.9,y:'暗'})-4;
 ENEMIES.push({n:'遺跡石像',t:'土',m:39,hp:50,atk:14,d:rock},{n:'星紋兔',t:'光',m:40,hp:43,atk:12,d:cuteSp(true,2,false)},{n:'夢境棉花',t:'光',m:41,hp:46,atk:13,d:slime},{n:'幻夢豬',t:'暗',m:42,hp:48,atk:14,d:cutePig});
@@ -289,7 +288,7 @@ const ruinsWild=()=>RUINS_IDS.map(i=>ENEMIES[i]),dreamWild=()=>DREAM_IDS.map(i=>
 NPCS.push(mk('a5',9,4,2,'qruins',['遺跡學者：古代遺跡的星盤又開始轉動了。'],null,null,null,null,'ruins'));NPCS.push(mk('town',10,12,2,'qdreamSpace',['夢境研究員：夢境空間正在呼喚新的訪客。'],null,null,null,null,'dreamSpace'));
 /* ---- undersea cave / vehicles expansion ---- */
 PAL.undersea=['#dffaff','#82dce6','#258caa','#07394a'];
-const underseaMap=['####################', '#.....#......#.....#', '#.ggg.#gg....#ggg..#', '#.....#............#', '#.gg...gg....#gg...#', '#.....#......#.....#', '####.##########.####', '#.....#......#.....#', '#............#.....#', '#.ggg.#gg.....ggg..#', '#.....#......#.....#', '#.gg...gg.....gg...#', '####################'];MAPS.undersea=underseaMap;
+const underseaMap=MAP_LAYOUTS.undersea;MAPS.undersea=underseaMap;
 const seaBase=ENEMIES.length;
 const seaMoves=MOVES.push({n:'深海水砲',p:35,a:.9,y:'水'},{n:'珊瑚護甲',t:'d'},{n:'潮汐撞擊',p:37,a:.88,y:'水'},{n:'鐵甲翻滾',p:31,a:.94,y:'土'})-4;
 ENEMIES.push({n:'深海史萊姆',t:'水',m:43,hp:48,atk:12,d:slime},{n:'珊瑚兔',t:'水',m:44,hp:42,atk:13,d:cuteSp(true,1,false)},{n:'潮汐豬',t:'水',m:45,hp:52,atk:15,d:cutePig},{n:'鐵甲蟹',t:'土',m:46,hp:55,atk:14,d:rock});
@@ -328,7 +327,7 @@ async function useLift(key){const stops=LIFTS[key];if(!stops)return;S.mode='even
 put('mine','K',[[4,11]]);put('volcIn','K',[[9,8]]);put('mine','U',[[10,1],[10,11]]);put('volcIn','U',[[9,1],[9,10]]);put('lab','U',[[9,1],[9,10]]);
 /* ---- multi-area map completion ---- */
 PAL.underseaDeep=['#d8f7ff','#65c7dc','#1b6e91','#062c43'];PAL.trench=['#c7eff6','#4aa0ba','#17556f','#041d32'];PAL.forestDeep=['#e5f4dc','#83bd72','#38734a','#173523'];PAL.forestGrove=['#eff9d7','#b4d875','#5a9444','#203b26'];PAL.ruins2=['#efe3c5','#c59e5c','#72522f','#2d2015'];PAL.dreamBranch=['#eee4ff','#b99ae8','#67459f','#211039'];PAL.dreamCore=['#fff0ff','#ee9bdc','#9e3c8e','#381333'];PAL.labUnderground=['#e5eaeb','#87969d','#3e4b53','#121b20'];
-const underseaDeepMap=['####################', '#....#........#....#', '#.ggg#.gg.....ggg..#', '#....#.............#', '#.............#....#', '#.gg.#.gg.....gg...#', '#....#........#....#', '#....#........#....#', '#########.##########', '#.............#....#', '#.ggg#.gg.....gg...#', '#.gg...gg.....gg...#', '####################'],trenchMap=['####################', '#.....#......#.....#', '#.ggg.#gg....#ggg..#', '#............#.....#', '#.....#............#', '#.gg..#gg....#gg...#', '##########.#########', '#.....#......#.....#', '#............#.....#', '#.....#............#', '#.ggg.#gg....#gg...#', '#.gg...gg.....gg...#', '####################'],forestDeepMap=['####################', '#....#........#....#', '#.ggg#.gg.....ggg..#', '#....#.............#', '#.............#....#', '#.gg.#.gg.....gg...#', '#....#........#....#', '#....#........#....#', '#########.##########', '#.............#....#', '#.ggg#.gg.....gg...#', '#.gg...gg.....gg...#', '####################'],forestGroveMap=['####################', '#.....#......#.....#', '#.ggg.#gg....#ggg..#', '#............#.....#', '#.....#............#', '#.gg..#gg....#gg...#', '##########.#########', '#.....#......#.....#', '#............#.....#', '#.....#............#', '#.ggg.#gg....#gg...#', '#.gg...gg.....gg...#', '####################'],ruins2Map=['####################', '#....#........#....#', '#.ggg#.gg.....ggg..#', '#....#.............#', '#.............#....#', '#.gg.#.gg.....gg...#', '#....#........#....#', '#....#........#....#', '#########.##########', '#.............#....#', '#.ggg#.gg.....gg...#', '#.gg...gg.....gg...#', '####################'],dreamBranchMap=['####################', '#.....#......#.....#', '#.ggg.#gg....#ggg..#', '#............#.....#', '#.....#............#', '#.gg..#gg....#gg...#', '##########.#########', '#.....#......#.....#', '#............#.....#', '#.....#............#', '#.ggg.#gg....#gg...#', '#.gg...gg.....gg...#', '####################'],dreamCoreMap=['####################', '#....#........#....#', '#.ggg#.gg.....ggg..#', '#....#.............#', '#.............#....#', '#.gg.#.gg.....gg...#', '#....#........#....#', '#....#........#....#', '#########.##########', '#.............#....#', '#.ggg#.gg.....gg...#', '#.gg...gg.....gg...#', '####################'],labUndergroundMap=['####################', '#.....#......#.....#', '#.ggg.#gg....#ggg..#', '#............#.....#', '#.....#............#', '#.gg..#gg....#gg...#', '##########.#########', '#.....#......#.....#', '#............#.....#', '#.....#............#', '#.ggg.#gg....#gg...#', '#.gg...gg.....gg...#', '####################'];
+const underseaDeepMap=MAP_LAYOUTS.underseaDeep,trenchMap=MAP_LAYOUTS.trench,forestDeepMap=MAP_LAYOUTS.forestDeep,forestGroveMap=MAP_LAYOUTS.forestGrove,ruins2Map=MAP_LAYOUTS.ruins2,dreamBranchMap=MAP_LAYOUTS.dreamBranch,dreamCoreMap=MAP_LAYOUTS.dreamCore,labUndergroundMap=MAP_LAYOUTS.labUnderground;
 MAPS.underseaDeep=underseaDeepMap;MAPS.trench=trenchMap;MAPS.forestDeep=forestDeepMap;MAPS.forestGrove=forestGroveMap;MAPS.ruins2=ruins2Map;MAPS.dreamBranch=dreamBranchMap;MAPS.dreamCore=dreamCoreMap;MAPS.labUnderground=labUndergroundMap;
 WARP['undersea,10,1']=['underseaDeep',1,1];WARP['underseaDeep,18,11']=['undersea',10,2];WARP['underseaDeep,10,1']=['trench',1,1];WARP['trench,18,11']=['underseaDeep',10,2];
 WARP['forest,10,1']=['forestDeep',1,1];WARP['forestDeep,18,11']=['forest',10,2];WARP['forestDeep,10,1']=['forestGrove',1,1];WARP['forestGrove,18,11']=['forestDeep',10,2];
@@ -384,10 +383,10 @@ const oldUseLift=useLift;useLift=async function(key){const stops=LIFTS[key];if(!
 	put('ruins2','M',[[9,8]]);put('dreamCore','M',[[9,8]]);Object.keys(MULTI_PUZZLES).forEach(k=>{const [m,x,y]=k.split(':');put(m,'M',[[+x,+y]])});put('trench','S',[[10,6]]);put('volcIn','S',[[9,7]]);put('labUnderground','S',[[9,8]]);put('dreamCore','Z',[[10,5]]);
 	/* ---- v6 exploration branches / random events ---- */
 	PAL.forestCanopy=['#edf8d8','#a4d276','#4c8a43','#1d3f2a'];PAL.forestMoss=['#e2f1d3','#74aa68','#356b48','#17372c'];PAL.trenchEast=['#c9f5fb','#55aec5','#1c637b','#062b3b'];PAL.trenchWest=['#d8f2f5','#699fb4','#315c70','#102f3d'];
-	const forestCanopyMap=['####################','#....#........#....#','#.ggg#.gg.....ggg..#','#....#.............#','#.............#....#','#.gg.#.gg.....gg...#','#....#........#....#','#....#........#....#','#########.##########','#.............#....#','#.ggg#.gg.....gg...#','#.gg...gg.....gg...#','####################'];
-	const forestMossMap=['####################','#.....#......#.....#','#.ggg.#gg....#ggg..#','#............#.....#','#.....#............#','#.gg..#gg....gg...#.','#.....#......#.....#','#..................#','##########.#########','#.....#............#','#.ggg.#gg....#gg...#','#.gg...gg.....gg...#','####################'];
-	const trenchEastMap=['####################','#....#......#.....#.','#.ggg#.gg....#gg..#.','#....#............#.','#.............#....#','#.gg.#.gg.....gg...#','#....#........#....#','#..................#','#########.##########','#....#.............#','#.ggg#.gg.....gg...#','#.gg...gg.....gg...#','####################'];
-	const trenchWestMap=['####################','#.....#......#.....#','#.ggg.#gg....#ggg..#','#............#.....#','#.....#............#','#.gg..#gg....gg...#.','#.....#......#.....#','#..................#','##########.#########','#.....#............#','#.ggg.#gg....#gg...#','#.gg...gg.....gg...#','####################'];
+	const forestCanopyMap=MAP_LAYOUTS.forestCanopy;
+	const forestMossMap=MAP_LAYOUTS.forestMoss;
+	const trenchEastMap=MAP_LAYOUTS.trenchEast;
+	const trenchWestMap=MAP_LAYOUTS.trenchWest;
 	MAPS.forestCanopy=forestCanopyMap;MAPS.forestMoss=forestMossMap;MAPS.trenchEast=trenchEastMap;MAPS.trenchWest=trenchWestMap;
 	 installBiomeLandmarks();
 	WARP['forestDeep,10,1']=['forestCanopy',1,1];WARP['forestCanopy,18,11']=['forestDeep',10,2];WARP['forestCanopy,10,1']=['forestGrove',1,1];WARP['forestGrove,18,11']=['forestCanopy',10,2];
@@ -1293,19 +1292,7 @@ const schoolMark=[12,2],schoolDoor=[11,3];
 [[10,2,'H'],[11,2,'H'],[12,2,'H'],[10,3,'H'],[11,3,'D'],[12,3,'H']].forEach(([x,y,c])=>placeTile('school',x,y,c));
 WARP['school,11,3']=['schoolInterior',6,9];
 WARP['schoolInterior,6,10']=['school',11,4];
-MAPS.schoolInterior=[
-'#############',
-'#...........#',
-'#...........#',
-'#...........#',
-'#...........#',
-'#...........#',
-'#...........#',
-'#...........#',
-'#...........#',
-'#..... .....#'.replace(' ',''),
-'######.######'
-];
+MAPS.schoolInterior=MAP_LAYOUTS.schoolInterior;
 PAL.schoolInterior=['#fff8e8','#e8bd79','#9b6337','#54351f'];
 WARP['school,11,3']=['schoolInterior',6,9];
 WARP['schoolInterior,6,10']=['school',11,4];
@@ -1415,7 +1402,7 @@ for(const mapName of _hospitalMaps){
  for(let yy=1;yy<rows.length-1&&!found;yy++)for(let xx=1;xx<rows[yy].length-1;xx++)if(rows[yy][xx]==='C'||rows[yy][xx]==='h'){found=[xx,yy];break}
  if(!found)continue;
  const [hx,hy]=found,room='hospital_'+mapName;
- MAPS[room]=['#########','#.......#','#.......#','#.......#','#.......#','#.......#','#.......#','#.......#','####.####'];
+ MAPS[room]=MAP_LAYOUTS.hospitalRoom.slice();
  PAL[room]=['#f5fbff','#b9dbe8','#5c9ab2','#24485c'];
  /* 沿用原本單一 C／h 房屋磚作為唯一入口，不再改寫周邊道路。 */
  WARP[`${mapName},${hx},${hy}`]=[room,4,7];
