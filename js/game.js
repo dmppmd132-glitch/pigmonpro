@@ -88,22 +88,30 @@ const jelly=(cx,cy)=>{ell(cx,cy,18,13,3);ell(cx,cy,17,12,1);R(cx-8,cy-3,4,4,3);R
 const legend=(cx,cy)=>{ell(cx,cy+6,22,16,3);ell(cx,cy+6,21,15,2);R(cx-14,cy-24,8,14,3);R(cx+6,cy-24,8,14,3);R(cx-4,cy-28,8,10,1);R(cx-10,cy,4,4,0);R(cx+6,cy,4,4,0);ell(cx,cy+12,7,4,0)};
 const bunny=(cx,cy)=>{ell(cx,cy+8,17,13,3);ell(cx,cy+8,16,12,0);ell(cx-9,cy-14,5,14,3);ell(cx-9,cy-14,3,11,1);ell(cx+9,cy-14,5,14,3);ell(cx+9,cy-14,3,11,1);R(cx-7,cy+4,3,3,3);R(cx+4,cy+4,3,3,3);ell(cx,cy+10,4,3,2)};
 const cutePig=(cx,cy)=>{ell(cx,cy+7,19,14,3);ell(cx,cy+7,18,13,0);R(cx-14,cy-12,8,7,3);R(cx+6,cy-12,8,7,3);ell(cx,cy-5,13,10,3);ell(cx,cy-5,12,9,0);ell(cx,cy+1,5,4,2);R(cx-7,cy-7,3,3,3);R(cx+4,cy-7,3,3,3)};
-const ENEMIES=[{n:'野狼',t:'普',m:4,hp:16,atk:4,d:wolf},{n:'蘿蔔精',t:'草',m:9,hp:14,atk:3,d:radish},{n:'兇蜂',t:'電',m:10,hp:12,atk:5,d:bee},{n:'史萊姆',t:'水',m:8,hp:20,atk:3,d:slime},{n:'火焰豬',t:'火',m:7,hp:15,atk:4,d:flame},{n:'岩石怪',t:'土',m:6,hp:22,atk:3,d:rock},{n:'水母怪',t:'水',m:8,hp:18,atk:4,d:jelly},{n:'炎皇豬',t:'火',m:11,hp:50,atk:9,d:legend},{n:'暗影蝙蝠',t:'暗',m:12,hp:17,atk:5,d:wolf},{n:'毒蘑菇',t:'毒',m:13,hp:19,atk:4,d:radish},{n:'冰晶怪',t:'冰',m:14,hp:24,atk:4,d:rock},{n:'月光靈',t:'光',m:15,hp:16,atk:6,d:slime}];
-const EXTRA_NAMES=['棉花團','奶油兔','草莓兔','蜜糖球','奶酥喵','布丁獸','泡芙豬','櫻桃啾','蘋果團','葡萄泥','彩虹狐','軟綿羊','星星鼠','牛奶熊','糖霜鹿','豆豆鳥','栗子鼴','果凍狐','雲朵羊','花瓣兔','薄荷貓','可可熊','焦糖蛙','奶油鼠','桃桃鹿','小月兔','甜甜圈獸','棉花蝸','蜜桃狐','彩蛋雞','鬆餅怪','莓果熊','銀河貓','露珠兔','泡泡魚','星砂蟹','軟糖龍','彩糖蛇','雪糕狐','奶茶蛙','小花鹿','雲朵豬','糖葫蘆鳥','粉晶兔','果醬怪','月牙狐','星願羊','甜心豬','彩光蝶'];
-const EXTRA_TYPES=['普','草','水','火','電','土','冰','毒','光','暗'];
-const EXTRA_SPRITES=[slime,bunny,radish,flame,bee,rock,jelly,wolf,cutePig,slime];
+const CREATURE_DATA=window.PIGMON_CREATURE_DATA;
+const CREATURE_SPRITES={wolf,radish,bee,slime,flame,rock,jelly,legend,bunny,cutePig};
+const createEnemy=(record,customSprites={})=>{
+ const {sprite,...data}=record;
+ const draw=typeof sprite==='string'?(customSprites[sprite]||CREATURE_SPRITES[sprite]):sprite?.kind==='cuteSp'?cuteSp(...sprite.args):null;
+ if(typeof draw!=='function')throw new Error('Unknown creature sprite: '+String(sprite));
+ return {...data,d:draw};
+};
+const ENEMIES=CREATURE_DATA.enemies.base.map(createEnemy);
+const EXTRA_NAMES=CREATURE_DATA.extraSpecies.names;
+const EXTRA_TYPES=CREATURE_DATA.extraSpecies.types;
+const EXTRA_SPRITES=CREATURE_DATA.extraSpecies.spriteKeys.map(k=>CREATURE_SPRITES[k]);
 EXTRA_NAMES.forEach((n,i)=>ENEMIES.push({n,t:EXTRA_TYPES[i%EXTRA_TYPES.length],m:4+(i%12),hp:12+(i%7)*2,atk:3+(i%5),d:EXTRA_SPRITES[i%EXTRA_SPRITES.length]}));
-const LEGENDS=[{n:'月兔仙子',t:'光',m:16,hp:70,atk:13,d:bunny},{n:'星耀豬皇',t:'光',m:17,hp:78,atk:14,d:cutePig},{n:'雲海兔王',t:'水',m:18,hp:74,atk:13,d:bunny},{n:'赤焰豬神',t:'火',m:19,hp:82,atk:15,d:cutePig}];LEGENDS.forEach(x=>ENEMIES.push(x));
-const LEGEND_IDS=[7,61,62,63,64],isLegend=s=>LEGEND_IDS.includes(s),legendTarget=()=>LEGEND_IDS.find(i=>!FL['leg'+i])||7,hasLegendLeft=()=>LEGEND_IDS.some(i=>!FL['leg'+i]);
-const MOVES=[{n:'粉紅衝撞',p:5,a:1},{n:'滾滾突襲',p:9,a:.8},{n:'哼哼',p:40,a:.9},{n:'元氣飼料',t:'h'},{n:'鋼鐵頭槌',p:8,a:1},{n:'豬突猛進',p:14,a:.85},{n:'大地泥彈',p:11,a:.95,y:'土'},{n:'暖焰火花',p:9,a:1,y:'火'},{n:'清泉水槍',p:9,a:1,y:'水'},{n:'荊棘藤鞭',p:9,a:1,y:'草'},{n:'雷光電擊',p:9,a:1,y:'電'},{n:'炎皇爆裂',p:20,a:.9,y:'火'},{n:'暗夜爪擊',p:12,a:.9,y:'暗'},{n:'毒霧噴吐',p:10,a:.95,y:'毒'},{n:'冰晶碎裂',p:13,a:.9,y:'冰'},{n:'月光脈衝',p:15,a:.9,y:'光'},{n:'月兔星願',p:32,a:.95,y:'光'},{n:'星耀豬皇擊',p:36,a:.9,y:'光'},{n:'雲海幻舞',p:34,a:.95,y:'水'},{n:'赤焰神燼',p:40,a:.85,y:'火'},{n:'炎煌神焰',p:45,a:.9,y:'火'}];
+const LEGENDS=CREATURE_DATA.enemies.legends.map(createEnemy);LEGENDS.forEach(x=>ENEMIES.push(x));
+const LEGEND_IDS=CREATURE_DATA.legendIds.slice(),isLegend=s=>LEGEND_IDS.includes(s),legendTarget=()=>LEGEND_IDS.find(i=>!FL['leg'+i])||7,hasLegendLeft=()=>LEGEND_IDS.some(i=>!FL['leg'+i]);
+const MOVES=CREATURE_DATA.moves.base.map(m=>({...m}));
 MOVES.forEach(m=>{if(!m.pp)m.pp=m.t==='h'?10:20});
-const PIG_EXCLUSIVE_MOVE=MOVES.push({n:'豬豬星爆',p:46,a:.92,y:'光',pp:12})-1;
-const PIG_ULTIMATE_MOVE=MOVES.push({n:'豬豬終焉天光',p:88,a:.86,y:'光',pp:5})-1;
-const SPECIES_MOVES={0:[0,4,5],1:[0,9,6],2:[0,10,5],3:[0,8,4],4:[0,7,11],5:[0,6,4],6:[0,8,10],7:[0,20,11],8:[0,12,5],9:[0,13,6],10:[0,14,4],11:[0,15,5],61:[0,16],62:[0,17],63:[0,18],64:[0,19]};
-const TYPE_MOVE={火:7,水:8,草:9,電:10,土:6,暗:12,毒:13,冰:14,光:15,普:4};
+const PIG_EXCLUSIVE_MOVE=MOVES.push(...CREATURE_DATA.moves.pigExclusive.map(m=>({...m})))-1;
+const PIG_ULTIMATE_MOVE=MOVES.push(...CREATURE_DATA.moves.pigUltimate.map(m=>({...m})))-1;
+const SPECIES_MOVES={...CREATURE_DATA.speciesMoves};
+const TYPE_MOVE=CREATURE_DATA.typeMove;
 const movesFor0=(s,lv)=>{const p=ENEMIES[s],pool=SPECIES_MOVES[s]||[0,TYPE_MOVE[p?.t]||4,5];return [0,...pool.filter(i=>i!==0&&((i===pool[1]&&lv>=3)||(i===pool[2]&&lv>=8)||(i===pool[3]&&lv>=16)))].slice(0,4)};
 const moveLabel=i=>{const m=MOVES[i];return m.p?`${m.n} 威力${m.p}`:`${m.n}（${m.t==='d'?'降攻':m.t==='rainbow'?'血量變1':m.t==='sweet'?'大補血+復活':'回復'}）`};
-const SE={普:[],火:['草','冰'],水:['火','土'],草:['水','土'],電:['水'],土:['電','火'],暗:['光'],毒:['草'],冰:['草','水'],光:['暗','毒']};
+const SE=CREATURE_DATA.typeEffectiveness;
 const mult=(a,d)=>SE[a].includes(d)?2:SE[d].includes(a)?.5:1;
 const nb=()=>GYMS.filter((g,i)=>FL['b'+i]).length;
 const mon=(s,lv)=>{const p=ENEMIES[s],h=p.hp+lv*3,m=statInit({s,n:p.n,t:p.t,lv,max:h,hp:h,exp:0,dh:h,mv:movesFor(s,lv),atk:p.atk+lv});m.max+=m.iv.hp||0;m.hp=m.max;m.dh=m.hp;m.shiny=Math.random()<.015;return yuFix(m)};
@@ -132,14 +140,14 @@ const cuteSp=(rb,ac,hu)=>(cx,cy)=>{const h=hu?1:0;ell(cx,cy+8,17,13,3);ell(cx,cy
  ell(cx,cy-2,12,9,3);ell(cx,cy-2,11,8,h);R(cx-6,cy-4,2,3,3);R(cx+4,cy-4,2,3,3);R(cx-9,cy,3,2,2);R(cx+6,cy,3,2,2);
  if(rb)R(cx-1,cy,2,2,2);else{ell(cx,cy+1,3,2,2);R(cx-1,cy+1,1,1,3);R(cx+1,cy+1,1,1,3)}
  if(ac===1){R(cx+6,cy-11,3,3,2);R(cx+10,cy-11,3,3,2)}if(ac===2){R(cx-1,cy-11,2,5,2);R(cx-3,cy-9,6,1,2)}if(ac===3)ell(cx+10,cy-9,3,2,2);if(ac===4){R(cx-12,cy+18,6,3,3);R(cx+6,cy+18,6,3,3)}};
-const NEWN='布丁兔 雲朵兔 草莓豬 蜜桃豬 棉花豬 奶蓋兔 糖心兔 年糕豬 湯圓兔 麻糬豬 珍珠兔 芋圓豬 奶茶兔 桂花豬 桃花兔 藍莓豬 薄荷兔 抹茶豬 櫻花兔 栗子豬 南瓜兔 檸檬豬 星星兔 月餅豬 雪球兔 彩虹豬 泡泡兔 蛋糕豬 餅乾兔 糖果豬 鈴鐺兔 花環豬 小太陽兔 小雨滴豬 雷雷兔 煙花豬 晶晶兔 夢夢豬 蝴蝶兔 星砂豬'.split(' ');
+const NEWN=CREATURE_DATA.newSpeciesNames;
 NEWN.forEach((n,i)=>ENEMIES.push({n,t:EXTRA_TYPES[(i*3+1)%10],m:4+i%12,hp:12+(i%7)*2,atk:3+i%5,d:cuteSp(n.endsWith('兔'),i%5,i%3===1)}));
 const moonB=(cx,cy)=>{bunny(cx,cy);R(cx-3,cy-20,6,2,2);R(cx-1,cy-23,2,3,2);R(cx-24,cy-6,3,3,2);R(cx+22,cy-2,3,3,2)};
 const boltP=(cx,cy)=>{cutePig(cx,cy);R(cx+1,cy-24,4,3,2);R(cx-1,cy-21,4,3,2);R(cx-3,cy-18,4,3,2);R(cx-24,cy-6,3,3,2);R(cx+22,cy-2,3,3,2)};
 const dream=(cx,cy)=>{ell(cx,cy+8,22,16,3);ell(cx,cy+8,21,15,0);[-11,11].forEach(o=>{ell(cx+o,cy-18,5,16,3);ell(cx+o,cy-18,3,13,1)});ell(cx,cy-3,15,12,3);ell(cx,cy-3,14,11,0);R(cx-8,cy-6,3,4,3);R(cx+5,cy-6,3,4,3);R(cx-12,cy,4,3,2);R(cx+8,cy,4,3,2);ell(cx,cy+2,5,3,2);R(cx-2,cy+2,1,1,3);R(cx+1,cy+2,1,1,3);R(cx-7,cy-15,14,3,2);R(cx-7,cy-19,3,4,2);R(cx-1,cy-21,3,6,2);R(cx+4,cy-19,3,4,2);ell(cx-3,cy+12,3,3,2);ell(cx+3,cy+12,3,3,2);R(cx-5,cy+14,10,3,2);R(cx-28,cy-8,3,3,2);R(cx+25,cy-4,3,3,2);R(cx+22,cy-22,2,2,1);R(cx-26,cy+10,2,2,1)};
-ENEMIES.push({n:'雪月兔神',t:'冰',m:20,hp:88,atk:16,d:moonB},{n:'雷霆豬王',t:'電',m:20,hp:92,atk:17,d:boltP});
-LEGEND_IDS.push(105,106);const ULT=107;ENEMIES.push({n:'夢幻兔豬皇',t:'光',m:30,hp:130,atk:22,d:dream});
-MOVES.push({n:'極光月舞',p:38,a:.95,y:'冰'},{n:'雷鳴豬突',p:42,a:.9,y:'電'},{n:'星夢閃光',p:42,a:.95,y:'光'},{n:'甜夢治癒',t:'h'},{n:'彩虹星爆',p:70,a:.9,y:'光'});
+ENEMIES.push(...CREATURE_DATA.enemies.v2Legends.map(e=>createEnemy(e,{moonB:moonB,boltP:boltP})));
+LEGEND_IDS.push(105,106);const ULT=107;ENEMIES.push(...CREATURE_DATA.enemies.dreamLegend.map(e=>createEnemy(e,{dream:dream})));
+MOVES.push(...CREATURE_DATA.moves.v2Legends.map(m=>({...m})));
 SPECIES_MOVES[105]=[0,21];SPECIES_MOVES[106]=[0,22];SPECIES_MOVES[107]=[0,23,24,25];
 let PZ=null;
 const pzTog=(g,i)=>{const x=i%3,y=i/3|0;[[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const X=x+a,Y=y+b;if(X>=0&&X<3&&Y>=0&&Y<3)g[Y*3+X]^=1})};
@@ -170,14 +178,10 @@ const wolfTile=(x,y)=>{R(x+2,y+2,3,4,3);R(x+11,y+2,3,4,3);ell(x+8,y+9,7,6,3);ell
 const moonWolf=(cx,cy)=>{wolf(cx,cy);ell(cx+14,cy-22,5,5,2);ell(cx+16,cy-23,4,4,0)};
 const wolfD=['拜月狼：嗷嗚——月光下的森林，只有我這一隻！','想通過這裡，先打倒我！'];
 NPCS.push(Object.assign(mk('forest',13,6,3,'wolf',wolfD,{n:'拜月狼',lv:5,b:{n:'拜月狼',hp:28,atk:5,d:moonWolf}},['拜月狼：嗚……月光認可你了。','森林的出口開啟了！'],wolfD[0]),{sp:wolfTile,hide:1}));
-ENEMIES.push({n:'鈺兔兔',t:'光',m:30,hp:60,atk:11,d:cuteSp(true,1,true)});
-MOVES.push({n:'撒嬌連環砲',p:28,a:.95,y:'光'},{n:'蘿蔔雨啪啦',p:30,a:.95,y:'草'},{n:'耍廢打滾擊',p:38,a:.9,y:'普'});SPECIES_MOVES[108]=[0,26,27,28];
+ENEMIES.push(...CREATURE_DATA.enemies.yuTuTu.map(e=>createEnemy(e)));
+MOVES.push(...CREATURE_DATA.moves.yuBase.map(m=>({...m})));SPECIES_MOVES[108]=[0,26,27,28];
 /* ===== 鈺兔兔專屬招式庫（玩家持有時套用）===== */
-const YU_SET=[
- MOVES.push({n:'撒嬌連環砲',p:45,a:1,y:'光',pp:99})-1,
- MOVES.push({n:'甜夢治癒',t:'sweet',pp:99})-1,
- MOVES.push({n:'彩虹紅蘿蔔',t:'rainbow',pp:99})-1,
- MOVES.push({n:'琉璃幻光・月兔晶華彈',p:99,a:1,y:'光',pp:99})-1];
+const YU_SET=CREATURE_DATA.moves.yuSpecial.map(m=>MOVES.push({...m})-1);
 function yuFix(m){if(m&&m.s===108){if(!m.mv||m.mv.join()!==YU_SET.join())m.mv=YU_SET.slice();m.maxpp=m.mv.map(()=>99);m.pp=m.mv.map(()=>99)}return m}
 const SQ=[['水系怪物最怕哪個屬性？',['火','電','暗'],1],['兔子的長耳朵有什麼用？',['散熱聽遠處','能飛行','變蘿蔔'],0],['光屬性對誰效果絕佳？',['火','冰','暗'],2]];
 async function teach(){S.mode='event';if(FL.yu){await say('老師：你是班上的第一名！鈺兔兔就拜託你照顧囉。');return}
@@ -211,7 +215,7 @@ for(const m of ['route','school','a2','a3','a4','a5','a6'])NPCS.push(mk(m,m==='r
 
 /* ---- v5 ---- */
 [['route',9,11,'school',9,0],['a2',15,11,'a3',2,0],['a4',18,0,'a5',2,11]].forEach(([a,xa,ya,b,xb,yb])=>{delete WARP[`${a},19,6`];delete WARP[`${b},0,6`];put(a,'#',[[19,6]]);put(b,'#',[[0,6]]);put(a,'.',[[xa,ya]]);put(b,'.',[[xb,yb]]);WARP[`${a},${xa},${ya}`]=[b,xb,yb?yb-1:1];WARP[`${b},${xb},${yb}`]=[a,xa,ya?ya-1:1]});
-const RARE=[95,96,97,98,99,100,101,102,103,104,7,61,62,63,64,105,106,107,108],TMV={},LEARN2={};
+const RARE=CREATURE_DATA.rareIds,TMV={},LEARN2={};
 [...new Set(RARE.map(i=>ENEMIES[i].t))].forEach(t=>{TMV[t]=[['氣彈',13,.95],['波動',18,.9],['風暴',25,.85]].map(([n,p,a])=>MOVES.push({n:t+n,p,a,y:t})-1)});
 RARE.forEach((i,k)=>{const e=ENEMIES[i],big=!(i>=95&&i<=104),o=[0,1,2].map(j=>TMV[e.t][(j+k)%3]),g=MOVES.push({n:e.n.slice(0,2)+['奇蹟','祝福','狂想曲','閃擊','之歌'][k%5],p:big?40+(k%3)*6:22+(k%3)*3,a:.9,y:e.t})-1,b=big?26:0;
  LEARN2[i]={[b+6+k%3]:o[0],[b+12+k%3]:o[1],[b+18+k%2]:o[2],[b+24+k%4]:g}});
@@ -222,8 +226,8 @@ const mineMap=MAP_LAYOUTS.mine;
 const volcInMap=MAP_LAYOUTS.volcIn;
 MAPS.mine=mineMap;MAPS.volcIn=volcInMap;
 const mineBase=ENEMIES.length;
-const mineMoves=MOVES.push({n:'鑿岩猛擊',p:30,a:.9,y:'土'},{n:'晶簇護盾',t:'d'},{n:'熔岩爆衝',p:34,a:.88,y:'火'},{n:'火山回音',p:27,a:.95,y:'火'})-4;
-ENEMIES.push({n:'礦坑鼴鼠',t:'土',m:31,hp:38,atk:9,d:rock},{n:'晶簇兔',t:'冰',m:32,hp:34,atk:10,d:cuteSp(true,4,true)},{n:'熔岩泥豬',t:'火',m:33,hp:42,atk:12,d:flame},{n:'火山翼蝠',t:'火',m:34,hp:36,atk:11,d:wolf});
+const mineMoves=MOVES.push(...CREATURE_DATA.moves.mine.map(m=>({...m})))-4;
+ENEMIES.push(...CREATURE_DATA.enemies.mine.map(e=>createEnemy(e)));
 const MINE_IDS=[mineBase,mineBase+1],VOLCIN_IDS=[mineBase+2,mineBase+3];
 SPECIES_MOVES[mineBase]=[0,mineMoves,6];SPECIES_MOVES[mineBase+1]=[0,mineMoves+1,14];SPECIES_MOVES[mineBase+2]=[0,mineMoves+2,11];SPECIES_MOVES[mineBase+3]=[0,mineMoves+3,12];
 WARP['a5,10,10']=['mine',1,1];WARP['mine,18,11']=['a5',10,11];WARP['volc,10,8']=['volcIn',1,1];WARP['volcIn,1,4']=['volc',10,9];
@@ -241,8 +245,8 @@ NPCS.push(mk('a5',11,10,2,'qmine',['礦工：地下礦坑的礦脈最近一直�
 PAL.iceCave=['#f3fbff','#b8e9ff','#4389b5','#17324b'];PAL.lab=['#edf1f2','#aab6bd','#4c5b63','#172126'];
 const iceCaveMap=MAP_LAYOUTS.iceCave;const labMap=MAP_LAYOUTS.lab;MAPS.iceCave=iceCaveMap;MAPS.lab=labMap;
 const newBase=ENEMIES.length;
-const newMoves=MOVES.push({n:'冰棱迴旋',p:32,a:.9,y:'冰'},{n:'霜花護體',t:'d'},{n:'電磁脈衝',p:31,a:.92,y:'電'},{n:'毒液試管',p:29,a:.95,y:'毒'})-4;
-ENEMIES.push({n:'冰晶鼴兔',t:'冰',m:35,hp:40,atk:11,d:cuteSp(true,2,true)},{n:'霜花豬',t:'冰',m:36,hp:45,atk:10,d:cutePig},{n:'實驗史萊姆',t:'毒',m:37,hp:39,atk:12,d:slime},{n:'電磁兔',t:'電',m:38,hp:35,atk:13,d:cuteSp(true,3,false)});
+const newMoves=MOVES.push(...CREATURE_DATA.moves.iceLab.map(m=>({...m})))-4;
+ENEMIES.push(...CREATURE_DATA.enemies.iceLab.map(e=>createEnemy(e)));
 const ICE_IDS=[newBase,newBase+1],LAB_IDS=[newBase+2,newBase+3];
 SPECIES_MOVES[newBase]=[0,newMoves,14];SPECIES_MOVES[newBase+1]=[0,newMoves+1,14];SPECIES_MOVES[newBase+2]=[0,newMoves+3,13];SPECIES_MOVES[newBase+3]=[0,newMoves+2,10];
 WARP['a6,10,10']=['iceCave',1,1];WARP['iceCave,18,11']=['a6',10,11];WARP['school,10,10']=['lab',1,1];WARP['lab,18,11']=['school',10,11];
@@ -269,8 +273,8 @@ NPCS.push(mk('a6',11,10,2,'qice',['守洞人：冰晶洞窟裡的月輪正在發
 PAL.ruins=['#f3ecdc','#d6bd83','#90713f','#3b2a17'];PAL.dreamSpace=['#f4eaff','#c9a5f5','#7650b5','#241344'];
 const ruinsMap=MAP_LAYOUTS.ruins;const dreamSpaceMap=MAP_LAYOUTS.dreamSpace;MAPS.ruins=ruinsMap;MAPS.dreamSpace=dreamSpaceMap;
 const extraBase=ENEMIES.length;
-const extraMoves=MOVES.push({n:'遺跡震擊',p:36,a:.88,y:'土'},{n:'星紋結界',t:'d'},{n:'夢境泡泡',p:34,a:.94,y:'光'},{n:'幻夢吞噬',p:38,a:.9,y:'暗'})-4;
-ENEMIES.push({n:'遺跡石像',t:'土',m:39,hp:50,atk:14,d:rock},{n:'星紋兔',t:'光',m:40,hp:43,atk:12,d:cuteSp(true,2,false)},{n:'夢境棉花',t:'光',m:41,hp:46,atk:13,d:slime},{n:'幻夢豬',t:'暗',m:42,hp:48,atk:14,d:cutePig});
+const extraMoves=MOVES.push(...CREATURE_DATA.moves.ruinsDream.map(m=>({...m})))-4;
+ENEMIES.push(...CREATURE_DATA.enemies.ruinsDream.map(e=>createEnemy(e)));
 const RUINS_IDS=[extraBase,extraBase+1],DREAM_IDS=[extraBase+2,extraBase+3];
 SPECIES_MOVES[extraBase]=[0,extraMoves,6];SPECIES_MOVES[extraBase+1]=[0,extraMoves+1,15];SPECIES_MOVES[extraBase+2]=[0,extraMoves+2,15];SPECIES_MOVES[extraBase+3]=[0,extraMoves+3,12];
 WARP['a5,8,4']=['ruins',1,1];WARP['ruins,18,11']=['a5',8,5];WARP['town,10,13']=['dreamSpace',1,1];WARP['dreamSpace,18,11']=['town',10,14];
@@ -290,8 +294,8 @@ NPCS.push(mk('a5',9,4,2,'qruins',['遺跡學者：古代遺跡的星盤又開始
 PAL.undersea=['#dffaff','#82dce6','#258caa','#07394a'];
 const underseaMap=MAP_LAYOUTS.undersea;MAPS.undersea=underseaMap;
 const seaBase=ENEMIES.length;
-const seaMoves=MOVES.push({n:'深海水砲',p:35,a:.9,y:'水'},{n:'珊瑚護甲',t:'d'},{n:'潮汐撞擊',p:37,a:.88,y:'水'},{n:'鐵甲翻滾',p:31,a:.94,y:'土'})-4;
-ENEMIES.push({n:'深海史萊姆',t:'水',m:43,hp:48,atk:12,d:slime},{n:'珊瑚兔',t:'水',m:44,hp:42,atk:13,d:cuteSp(true,1,false)},{n:'潮汐豬',t:'水',m:45,hp:52,atk:15,d:cutePig},{n:'鐵甲蟹',t:'土',m:46,hp:55,atk:14,d:rock});
+const seaMoves=MOVES.push(...CREATURE_DATA.moves.undersea.map(m=>({...m})))-4;
+ENEMIES.push(...CREATURE_DATA.enemies.undersea.map(e=>createEnemy(e)));
 const UNDERSEA_IDS=[seaBase,seaBase+1,seaBase+2,seaBase+3];
 SPECIES_MOVES[seaBase]=[0,seaMoves,8];SPECIES_MOVES[seaBase+1]=[0,seaMoves,14];SPECIES_MOVES[seaBase+2]=[0,seaMoves+2,16];SPECIES_MOVES[seaBase+3]=[0,seaMoves+3,12];
 WARP['sea,12,10']=['undersea',1,1];WARP['undersea,18,11']=['sea',12,11];put('sea','D',[[12,10]]);put('undersea','D',[[18,11]]);
@@ -308,8 +312,8 @@ const underseaWild=()=>[...UNDERSEA_IDS,...(typeof SEA_RELIC_IDS==='undefined'?[
 	 const moonMoth=(cx,cy)=>{bee(cx,cy);evoPoly([[cx-8,cy-4],[cx-25,cy-18],[cx-19,cy+2]],'#b4d875');evoPoly([[cx+8,cy-4],[cx+25,cy-18],[cx+19,cy+2]],'#b4d875');evoRing(cx,cy-18,5,'#fff0a8',2)};
 	 const groveStag=(cx,cy)=>{wolf(cx,cy);evoPoly([[cx-13,cy-20],[cx-25,cy-31],[cx-20,cy-18],[cx-31,cy-23],[cx-18,cy-12]],'#83bd72');evoPoly([[cx+13,cy-20],[cx+25,cy-31],[cx+20,cy-18],[cx+31,cy-23],[cx+18,cy-12]],'#83bd72');evoPixel(cx-3,cy-2,3,3,'#fff3a8');evoPixel(cx+5,cy-2,3,3,'#fff3a8')};
 	 const biomeBase=ENEMIES.length;
-	 const biomeMoves=MOVES.push({n:'深淵藤鞭',p:34,a:.92,y:'水'},{n:'珊瑚星塵',p:36,a:.9,y:'水'},{n:'月潮咆哮',p:39,a:.88,y:'水'},{n:'苔光孢子',p:31,a:.94,y:'草'},{n:'月蛾幻粉',p:35,a:.9,y:'光'},{n:'古樹角擊',p:42,a:.86,y:'草'})-6;
-	 ENEMIES.push({n:'深淵海藻靈',t:'水',m:75,hp:56,atk:14,d:abyssKelp},{n:'珊瑚星鰩',t:'水',m:76,hp:51,atk:15,d:coralRay},{n:'潮汐角豬',t:'水',m:77,hp:64,atk:17,d:tideBoar},{n:'苔光幽靈',t:'草',m:78,hp:53,atk:13,d:mossWisp},{n:'月紋幻蛾',t:'光',m:79,hp:48,atk:16,d:moonMoth},{n:'古樹星鹿',t:'草',m:80,hp:70,atk:18,d:groveStag});
+	 const biomeMoves=MOVES.push(...CREATURE_DATA.moves.biome.map(m=>({...m})))-6;
+	 ENEMIES.push(...CREATURE_DATA.enemies.biome.map(e=>createEnemy(e,{abyssKelp:abyssKelp,coralRay:coralRay,tideBoar:tideBoar,mossWisp:mossWisp,moonMoth:moonMoth,groveStag:groveStag})));
 	 const BIOME_IDS=[biomeBase,biomeBase+1,biomeBase+2,biomeBase+3,biomeBase+4,biomeBase+5],SEA_RELIC_IDS=BIOME_IDS.slice(0,3),FOREST_RELIC_IDS=BIOME_IDS.slice(3);
 	 SPECIES_MOVES[biomeBase]=[0,biomeMoves,8];SPECIES_MOVES[biomeBase+1]=[0,biomeMoves+1,10];SPECIES_MOVES[biomeBase+2]=[0,biomeMoves+2,12];SPECIES_MOVES[biomeBase+3]=[0,biomeMoves+3,8];SPECIES_MOVES[biomeBase+4]=[0,biomeMoves+4,10];SPECIES_MOVES[biomeBase+5]=[0,biomeMoves+5,12];
 	 const RARE_LOOT={
@@ -338,8 +342,8 @@ Object.assign(ITEM_DATA,{'underseaDeep:15:10':{name:'深淵珍珠',give:()=>{BAG
 put('underseaDeep','I',[[15,10]]);put('trench','I',[[3,10]]);put('forestDeep','I',[[15,10]]);put('forestGrove','I',[[3,10]]);put('ruins2','I',[[15,10]]);put('dreamBranch','I',[[3,10]]);put('dreamCore','I',[[15,10]]);put('labUnderground','I',[[3,10]]);
 /* ---- final systems completion ---- */
 const finalBossBase=ENEMIES.length;
-const bossMoves=MOVES.push({n:'深淵潮汐',p:48,a:.9,y:'水'},{n:'森林王怒',p:46,a:.9,y:'草'},{n:'遺跡神罰',p:52,a:.86,y:'土'},{n:'夢核輪迴',p:55,a:.88,y:'暗'},{n:'實驗崩解',p:50,a:.9,y:'毒'})-5;
-ENEMIES.push({n:'深淵海龍',t:'水',m:70,lv:34,hp:108,atk:20,d:legend},{n:'森林秘境古王',t:'草',m:71,lv:36,hp:104,atk:19,d:rock},{n:'遺跡第二層守護神',t:'土',m:72,lv:38,hp:118,atk:22,d:legend},{n:'夢境核心雙生體',t:'暗',m:73,lv:40,hp:122,atk:23,d:legend},{n:'地下研究所終極體',t:'毒',m:74,lv:42,hp:116,atk:21,d:jelly});
+const bossMoves=MOVES.push(...CREATURE_DATA.moves.finalBosses.map(m=>({...m})))-5;
+ENEMIES.push(...CREATURE_DATA.enemies.finalBosses.map(e=>createEnemy(e)));
 const FINAL_BOSSES={underseaDeep:finalBossBase,forestGrove:finalBossBase+1,ruins2:finalBossBase+2,dreamCore:finalBossBase+3,labUnderground:finalBossBase+4};
 Object.entries(FINAL_BOSSES).forEach(([m,i])=>{SPECIES_MOVES[i]=[0,bossMoves+(i-finalBossBase),1]});
 Object.keys(FINAL_BOSSES).forEach(m=>{const pos={underseaDeep:[15,5],forestGrove:[15,5],ruins2:[15,5],dreamCore:[15,5],labUnderground:[15,5]}[m];put(m,'B',[pos])});
@@ -1464,7 +1468,7 @@ for(const mapName of _hospitalMaps){
 
  /* ---------- 1. 傳說巢穴：19 位守護者各自一個巢穴、一個入口 ---------- */
  /* 守護者順序：前 6 位沿用原本的入口（G 門），其餘 13 位原本只有入口沒有地圖 → 會讓遊戲壞掉 */
- const GU=[7,61,63,64,105,106,95,96,97,98,99,100,101,102,103,104,62,107,108];
+ const GU=CREATURE_DATA.groveGuardIds;
  const OLD_DOORS=[['a4',17,1],['a2',17,1],['sea',13,2],['volc',17,4],['a6',17,1],['a3',17,1]];
  const NEW_HOSTS=['a2','a3','a4','a5','a6','route','school','forest','sea','volc','mine','volcIn','town'];
  /* 清掉所有跟巢穴有關的舊傳送點（它們的出口落在牆裡，或指向不存在的地圖） */
