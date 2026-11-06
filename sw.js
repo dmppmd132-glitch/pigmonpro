@@ -1,4 +1,4 @@
-const CACHE_NAME = "pigmonpro-v1";
+const CACHE_NAME = "pigmonpro-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
