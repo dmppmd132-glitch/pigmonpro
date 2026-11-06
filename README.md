@@ -6,7 +6,7 @@
 
 - `index.html`：遊戲頁面與 Canvas、控制介面
 - `css/style.css`：版面、按鈕與色彩樣式
-- `js/game.js`：繪圖、操作、事件與遊戲邏輯
+- `js/game/`：依責任拆分的遊戲模組，從 `core.js` 到 `ui.js` 依序載入
 - `js/maps/layouts.js`：固定地圖格線與室內版型
 - `js/maps/README.md`：地圖資料格式與新增方式
 - `js/creatures/catalog.js`：怪物與生態資料目錄
@@ -16,7 +16,22 @@
 - `js/items/catalog.js`：拾取道具、素材、配方與商店資料
 - `js/items/README.md`：新增道具與調整配方／商店
 
-新增或調整怪物、招式、道具與地圖，分別編輯 `js/creatures/`、`js/moves/`、`js/items/` 與 `js/maps/` 中的資料目錄；遊戲執行邏輯留在 `js/game.js`，載入順序集中在 `index.html`。
+新增或調整怪物、招式、道具與地圖，分別編輯 `js/creatures/`、`js/moves/`、`js/items/` 與 `js/maps/` 中的資料目錄；遊戲邏輯則依功能放在 `js/game/`，載入順序集中在 `index.html`。
+
+## 遊戲程式模組
+
+為了維持 GitHub Pages 的免建置部署，遊戲使用依序載入的瀏覽器 JavaScript 模組：
+
+- `js/game/core.js`：Canvas 工具、地圖基礎資料、遊戲狀態、角色與 NPC
+- `js/game/world.js`：世界區域、特殊地形、謎題、地標與服務功能
+- `js/game/menus.js`：對話、選單、背包、商店、任務、存檔與進化
+- `js/game/gameplay.js`：移動、事件流程、隨機遇敵、戰鬥與戰鬥特效
+- `js/game/render.js`：地圖、戰鬥、標題畫面與主迴圈繪製
+- `js/game/audio.js`：Web Audio 背景音樂與音效
+- `js/game/features.js`：房屋、學堂、迷宮、探索與後期功能擴充
+- `js/game/ui.js`：鍵盤／觸控輸入、UI 最終覆寫與啟動流程
+
+各模組仍維持原本的載入順序，因此不需要 Node.js、打包工具或額外伺服器設定。
 
 ## 本機遊玩
 

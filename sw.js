@@ -1,9 +1,16 @@
-const CACHE_NAME = "pigmonpro-v2";
+const CACHE_NAME = "pigmonpro-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./css/style.css",
-  "./js/game.js",
+  "./js/game/core.js",
+  "./js/game/world.js",
+  "./js/game/menus.js",
+  "./js/game/gameplay.js",
+  "./js/game/render.js",
+  "./js/game/audio.js",
+  "./js/game/features.js",
+  "./js/game/ui.js",
   "./js/maps/layouts.js",
   "./js/creatures/catalog.js",
   "./js/moves/catalog.js",
