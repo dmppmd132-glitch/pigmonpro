@@ -40,3 +40,20 @@ python3 -m http.server 8000
 發布後可在 GitHub 儲存庫的 **Settings → Pages** 啟用網站。若採用 `main` 分支根目錄，網址會是：
 
 `https://dmppmd132-glitch.github.io/pigmonpro/`
+
+## PWA 與離線遊玩
+
+專案已加入 `manifest.json` 與 `sw.js`。第一次在線上開啟遊戲後，Service Worker 會快取遊戲頁面、JavaScript、CSS 與圖標；之後即使沒有網路，也可以從已安裝的 PWA 啟動遊戲。
+
+### 圖標尺寸
+
+- `icons/icon-120.png`：較舊 iPhone 的 `apple-touch-icon`
+- `icons/icon-152.png`：iPad Retina 的 `apple-touch-icon`
+- `icons/icon-167.png`：iPad Pro 的 `apple-touch-icon`
+- `icons/icon-180.png`：現代 iPhone 的 `apple-touch-icon`
+- `icons/icon-192.png`：Android 與瀏覽器安裝提示的標準圖標
+- `icons/icon-512.png`：高解析度安裝圖標，以及 maskable 圖標來源
+
+目前圖標是可直接使用的基本豬豬圖案。若要替換正式美術，只要保留上述檔名、尺寸與 PNG 格式即可。
+
+在 iPhone／iPad 上，請使用 Safari 開啟網站，按「分享」→「加入主畫面」。iOS 不會像 Android 一樣完全依照 Web App Manifest 顯示安裝提示，因此 `apple-touch-icon` 與 Apple 專用 meta 標籤是必要的。
