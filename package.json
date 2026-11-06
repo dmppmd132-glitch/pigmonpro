@@ -1,0 +1,8 @@
+{
+  "name": "pigmonpro",
+  "private": true,
+  "description": "豬豬小可愛*粉紅",
+  "scripts": {
+    "test": "node tests/run-tests.js"
+  }
+}
